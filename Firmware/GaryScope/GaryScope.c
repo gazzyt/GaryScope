@@ -44,7 +44,6 @@ static uchar    idleRate;           /* in 4 ms units */
 static uchar    adcPending;
 static uchar    isRecording;
 
-static uchar    valueBuffer[16];
 static unsigned int adcValue;
 static uchar	adcValueToSend;
 static uchar    *nextDigit;
@@ -73,44 +72,7 @@ const PROGMEM char usbHidReportDescriptor[USB_CFG_HID_REPORT_DESCRIPTOR_LENGTH] 
  * for the second INPUT item.
  */
 
-/* Keyboard usage values, see usb.org's HID-usage-tables document, chapter
- * 10 Keyboard/Keypad Page for more codes.
- */
-#define MOD_CONTROL_LEFT    (1<<0)
-#define MOD_SHIFT_LEFT      (1<<1)
-#define MOD_ALT_LEFT        (1<<2)
-#define MOD_GUI_LEFT        (1<<3)
-#define MOD_CONTROL_RIGHT   (1<<4)
-#define MOD_SHIFT_RIGHT     (1<<5)
-#define MOD_ALT_RIGHT       (1<<6)
-#define MOD_GUI_RIGHT       (1<<7)
-
-#define KEY_1       30
-#define KEY_2       31
-#define KEY_3       32
-#define KEY_4       33
-#define KEY_5       34
-#define KEY_6       35
-#define KEY_7       36
-#define KEY_8       37
-#define KEY_9       38
-#define KEY_0       39
-#define KEY_RETURN  40
-
 /* ------------------------------------------------------------------------- */
-
-static void buildReport(void)
-{
-uchar   key = 0;
-
-    if(nextDigit != NULL){
-        key = *nextDigit;
-    }
-    reportBuffer[0] = 0;    /* no modifiers */
-    reportBuffer[1] = key;
-	reportBuffer[2] = 0;
-	reportBuffer[3] = 0;
-}
 
 static void evaluateADC(unsigned int value)
 {
@@ -118,23 +80,6 @@ static void evaluateADC(unsigned int value)
 	//reportBuffer[0] = 12;
 	//reportBuffer[1] = 34;
 	adcValueToSend = 1;
-//uchar   digit;
-
-    //value += value + (value >> 1);  /* value = value * 2.5 for output in mV */
-    //nextDigit = &valueBuffer[sizeof(valueBuffer)];
-    //*--nextDigit = 0xff;/* terminate with 0xff */
-    /**--nextDigit = 0;
-    *--nextDigit = KEY_RETURN;
-    do{
-        digit = value % 10;
-        value /= 10;
-        *--nextDigit = 0;
-        if(digit == 0){
-            *--nextDigit = KEY_0;
-        }else{
-            *--nextDigit = KEY_1 - 1 + digit;
-        }
-    }while(value != 0); */
 }
 
 /* ------------------------------------------------------------------------- */
@@ -216,7 +161,6 @@ usbRequest_t    *rq = (void *)data;
     if((rq->bmRequestType & USBRQ_TYPE_MASK) == USBRQ_TYPE_CLASS){    /* class request type */
         if(rq->bRequest == USBRQ_HID_GET_REPORT){  /* wValue: ReportType (highbyte), ReportID (lowbyte) */
             /* we only have one report type, so don't look at wValue */
-            buildReport();
             return sizeof(reportBuffer);
         }else if(rq->bRequest == USBRQ_HID_GET_IDLE){
             usbMsgPtr = &idleRate;
@@ -326,11 +270,8 @@ uchar   calibrationValue;
         wdt_reset();
         usbPoll();
         if(usbInterruptIsReady() && adcValueToSend != 0){ /* we can send another key */
-            //buildReport();
             usbSetInterrupt(reportBuffer, sizeof(reportBuffer));
 			adcValueToSend = 0;
-            //if(*++nextDigit == 0xff)    /* this was terminator character */
-              //  nextDigit = NULL;
         }
         timerPoll();
         adcPoll();
