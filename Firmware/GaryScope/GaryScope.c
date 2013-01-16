@@ -60,6 +60,10 @@ const PROGMEM char usbHidReportDescriptor[USB_CFG_HID_REPORT_DESCRIPTOR_LENGTH] 
     0x95, 0x04,                    //   REPORT_COUNT (2)
 	0x09, 0x00,					   //   USAGE (undefined)
     0x82, 0x02, 0x01,              //   INPUT (Data,Var,Abs,Buf)
+    0x75, 0x08,                    //   REPORT_SIZE (8)
+    0x95, 0x02,                    //   REPORT_COUNT (2)
+    0x09, 0x00,					   //   USAGE (undefined)
+    0x92, 0x02, 0x01,              //   INPUT (Data,Var,Abs,Buf)
     0xc0                           // END_COLLECTION
 };
 /* We use a simplifed keyboard report descriptor which does not support the
