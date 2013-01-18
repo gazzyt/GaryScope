@@ -118,7 +118,7 @@ UpgradeLog*.XML
 ## Atmel Studio
 ############
 TcfTransactionLog.csv
-
+*.atsuo
 
 ############
 ## Windows
