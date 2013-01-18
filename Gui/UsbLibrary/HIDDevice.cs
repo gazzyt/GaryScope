@@ -222,7 +222,8 @@ namespace UsbLibrary
                 }
                 else
                 {
-                    oDetail.Size = 4 + Marshal.SystemDefaultCharSize;
+                    //oDetail.Size = 4 + Marshal.SystemDefaultCharSize;
+                    oDetail.Size = 4 + 1;
                 }
 
 				//oDetail.Size = 5;	// hardcoded to 5! Sorry, but this works and trying more future proof versions by setting the size to the struct sizeof failed miserably. If you manage to sort it, mail me! Thx
