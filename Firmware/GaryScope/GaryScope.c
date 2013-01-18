@@ -63,7 +63,7 @@ const PROGMEM char usbHidReportDescriptor[USB_CFG_HID_REPORT_DESCRIPTOR_LENGTH] 
     0x75, 0x08,                    //   REPORT_SIZE (8)
     0x95, 0x02,                    //   REPORT_COUNT (2)
     0x09, 0x00,					   //   USAGE (undefined)
-    0x92, 0x02, 0x01,              //   INPUT (Data,Var,Abs,Buf)
+    0x92, 0x02, 0x01,              //   OUTPUT (Data,Var,Abs,Buf)
     0xc0                           // END_COLLECTION
 };
 /* We use a simplifed keyboard report descriptor which does not support the
@@ -96,6 +96,19 @@ static void setIsRecording(uchar newValue)
     }else{
         PORTB &= ~(1 << BIT_LED);   /* LED off */
     }
+}
+
+
+/*
+	Sets the clock select bits of the Timer/Counter 1 (TCCR1) to the requested value.
+	We set bits 3:0 of TCCR1 with the bits 3:0 of data[0]
+*/
+static void SetClock(uchar *data, uchar len)
+{
+	if (len == 1)
+	{
+		TCCR1 = (TCCR1 & 0xF0) | (data[0] & 0x0F);
+	}
 }
 
 /* ------------------------------------------------------------------------- */
@@ -143,8 +156,8 @@ static uchar timerCnt;
 
 static void timerInit(void)
 {
-    //TCCR1 = 0x0b;           /* select clock: 16.5M/1k -> overflow rate = 16.5M/256k = 62.94 Hz */
-	TCCR1 = 0x07;
+    TCCR1 = 0x0b;           /* select clock: 16.5M/1k -> overflow rate = 16.5M/256k = 62.94 Hz */
+	setIsRecording(1);
 }
 
 static void adcInit(void)
@@ -157,6 +170,30 @@ static void adcInit(void)
 /* ------------------------ interface to USB driver ------------------------ */
 /* ------------------------------------------------------------------------- */
 
+uchar   usbFunctionWrite(uchar *data, uchar len)
+{
+	//eeprom_write_byte(4, len);
+	//eeprom_write_block(data, 5, len);
+	if(len < 2)
+		return 0xFF; // Stall
+		
+	if (data[0] == 1)
+	{
+		SetClock(&data[1], len-1);
+		return 1;
+	}	
+	else if (data[0] == 2)
+	{
+		setIsRecording(data[1] != 0);
+		return 1;
+	}
+	else
+	{
+		return 0xFF;
+	}		
+}
+
+
 uchar	usbFunctionSetup(uchar data[8])
 {
 usbRequest_t    *rq = (void *)data;
@@ -166,6 +203,8 @@ usbRequest_t    *rq = (void *)data;
         if(rq->bRequest == USBRQ_HID_GET_REPORT){  /* wValue: ReportType (highbyte), ReportID (lowbyte) */
             /* we only have one report type, so don't look at wValue */
             return sizeof(reportBuffer);
+		}else if(rq->bRequest == USBRQ_HID_SET_REPORT){
+			return USB_NO_MSG;
         }else if(rq->bRequest == USBRQ_HID_GET_IDLE){
             usbMsgPtr = &idleRate;
             return 1;
