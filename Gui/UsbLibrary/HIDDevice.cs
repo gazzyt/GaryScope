@@ -177,6 +177,7 @@ namespace UsbLibrary
             try
             {
                 m_oFile.Write(oOutRep.Buffer, 0, oOutRep.BufferLength);
+                m_oFile.Flush();
             }
             catch (IOException ex)
             {

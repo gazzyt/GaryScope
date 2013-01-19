@@ -15,7 +15,7 @@ namespace UsbLibrary
             byte[] arrBuff = Buffer; //new byte[Buffer.Length];
             for (int i = 1; i < arrBuff.Length; i++)
             {
-                arrBuff[i] = data[i];
+                arrBuff[i] = data[i-1];
             }
 
             //Buffer = arrBuff;
