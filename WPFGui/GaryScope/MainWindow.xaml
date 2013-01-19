@@ -10,11 +10,11 @@
     	</Grid.RowDefinitions>
         <StackPanel Grid.Row="0" Orientation="Horizontal">
         	<CheckBox Content="Run" IsChecked="{Binding IsRunning, Mode=TwoWay}"/>
-        	<Slider Maximum="15" SmallChange="1" TickPlacement="TopLeft" Width="100" AutoToolTipPlacement="TopLeft"/>
+        	<Slider Maximum="15" SmallChange="1" TickPlacement="TopLeft" Width="100" AutoToolTipPlacement="TopLeft" Value="{Binding ClockSpeed, Mode=TwoWay}"/>
         </StackPanel>
 
         <c:ChartPlotter x:Name="plotter" Grid.Row="1">
-            <c:RectangleHighlight Bounds="0.1, 0.6, 0.15, 0.2" StrokeThickness="2" Fill="MidnightBlue"
+         <!--   <c:RectangleHighlight Bounds="0.1, 0.6, 0.15, 0.2" StrokeThickness="2" Fill="MidnightBlue"
 									 ToolTip="Sample region"/>
             <c:HorizontalLine Value="0.5" StrokeThickness="2" ToolTip="Hamster was here"/>
             <c:HorizontalLine Value="0.25"/>
@@ -23,11 +23,11 @@
             <c:Segment StartPoint="0.3, 0.45" EndPoint="0.5, 0.65" Stroke="Green" StrokeThickness="2"
 								 StrokeDashArray="2"/>
             <c:HorizontalRange Value1="0.1" Value2="0.15" Fill="Green"/>
-            <c:VerticalRange Value1="0.1" Value2="0.12" Fill="Fuchsia"/>
+            <c:VerticalRange Value1="0.1" Value2="0.12" Fill="Fuchsia"/>-->
 
-            <c:ViewportUIContainer Position="0.3,0.7">
+            <!--<c:ViewportUIContainer Position="0.3,0.7">
                 <Button Content="Hello!"/>
-            </c:ViewportUIContainer>
+            </c:ViewportUIContainer>-->
         </c:ChartPlotter>
 
     </Grid>

@@ -11,6 +11,7 @@
     {
         private SpecifiedDevice scopeDevice;
         private bool isRunning = true;
+        private byte clockSpeed = 0x0b;
 
         public MainWindowViewModel()
         {
@@ -39,6 +40,28 @@
                 isRunning = value;
                 StartStopScope();
             }
+        }
+
+        public double ClockSpeed
+        {
+            get { return Convert.ToDouble(clockSpeed); }
+            set
+            {
+                var newClockSpeed = Convert.ToByte(value);
+                if (newClockSpeed != clockSpeed)
+                {
+                    clockSpeed = newClockSpeed;
+                    SetClockSpeed();
+                }
+            }
+        }
+
+        private void SetClockSpeed()
+        {
+            byte[] command = new byte[2];
+            command[0] = 1;
+            command[1] = clockSpeed;
+            scopeDevice.SendData(command);
         }
 
         private void StartStopScope()
