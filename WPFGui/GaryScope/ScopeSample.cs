@@ -8,7 +8,7 @@
     /// <summary>
     /// TODO: Update summary.
     /// </summary>
-    public class ScopeSample
+    public struct ScopeSample
     {
         public DateTime Time { get; set; }
         public UInt16 Value { get; set; }
