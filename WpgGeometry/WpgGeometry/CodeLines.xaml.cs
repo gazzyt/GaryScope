@@ -20,31 +20,26 @@ namespace WpgGeometry
     /// </summary>
     public partial class CodeLines : Window
     {
-        private double phase = 0.0;
         private int nextSample = 0;
-        private Timer sampleTimer;
         private Timer redrawTimer;
         private GeometryGroup lines;
         private const int linesPerTrace = 100;
         private double[] samples = new double[linesPerTrace];
+        private SineGenerator generator;
 
         public CodeLines()
         {
             InitializeComponent();
+            generator = new SineGenerator();
+            generator.Frequency = 200;
+            generator.SamplesPerSecond = 300;
+            generator.SampleReadyEvent += AddSample;
         }
 
         private void canvas_Loaded(object sender, RoutedEventArgs e)
         {
-            do
-            {
-                AddSample();
-            } while (nextSample != 0);
-
-            DrawScene();
-
-
-            sampleTimer = new Timer(SampleTimerTick, null, 0, 10);
             redrawTimer = new Timer(RedrawTimerTick, null, 0, 50);
+            generator.Start();
         }
 
         private void RedrawTimerTick(object state = null)
@@ -133,15 +128,10 @@ namespace WpgGeometry
             }
         }
 
-        private void SampleTimerTick(object state)
-        {
-            this.Dispatcher.Invoke(
-                new Action(() => AddSample()));
-        }
 
-        private void AddSample()
+        private void AddSample(double sample)
         {
-            samples[nextSample] = Math.Sin(phase++ / 10.0) * 100;
+            samples[nextSample] = sample * 100;
             nextSample++;
             if (nextSample >= linesPerTrace)
             {
