@@ -10,6 +10,8 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using System.Threading;
+using System.Windows.Threading;
 
 namespace WpgGeometry
 {
@@ -18,6 +20,12 @@ namespace WpgGeometry
     /// </summary>
     public partial class CodeLines : Window
     {
+        private double phase = 0.0;
+        private int sample = 0;
+        private Timer timer;
+        private GeometryGroup lines;
+        private const int linesPerTrace = 100;
+
         public CodeLines()
         {
             InitializeComponent();
@@ -28,7 +36,7 @@ namespace WpgGeometry
             // 
             // Create the Geometry to draw. 
             //
-            GeometryGroup lines = new GeometryGroup();
+            lines = new GeometryGroup();
             AddLines(lines);
             //lines.Children.Add(
             //    new EllipseGeometry(new Point(50, 50), 45, 20)
@@ -62,7 +70,7 @@ namespace WpgGeometry
             DrawingImage geometryImage = new DrawingImage(aGeometryDrawing);
 
             // Freeze the DrawingImage for performance benefits.
-            geometryImage.Freeze();
+            //geometryImage.Freeze();
 
             Image anImage = new Image();
             anImage.Source = geometryImage;
@@ -87,6 +95,7 @@ namespace WpgGeometry
 
             canvas.Children.Add(anImage);
 
+            timer = new Timer(TimerTick, null, 0, 10);
         }
 
         private void AddLines(GeometryGroup group)
@@ -94,12 +103,30 @@ namespace WpgGeometry
             int lineNum;
             Point lastLineEnd = new Point(0.0, 0.0);
 
-            for (int i = 0; i < 1000; i++)
+            for (phase = 0.0; phase < linesPerTrace; phase++)
             {
-                double doubleI = Convert.ToDouble(i);
-                Point thisLineEnd = new Point(doubleI, Math.Sin(doubleI/20.0) * 100);
+                Point thisLineEnd = new Point(phase * 5, Math.Sin(phase/40.0) * 100);
                 group.Children.Add(new LineGeometry(lastLineEnd, thisLineEnd));
                 lastLineEnd = thisLineEnd;
+            }
+        }
+
+        private void TimerTick(object state)
+        {
+            this.Dispatcher.Invoke(
+                new Action(() => AddSample()));
+        }
+
+        private void AddSample()
+        {
+            LineGeometry oldLine = (LineGeometry)lines.Children[sample];
+            LineGeometry prevLine = (LineGeometry)lines.Children[sample > 0 ? sample - 1 : linesPerTrace-1];
+            oldLine.StartPoint = new Point(oldLine.StartPoint.X, prevLine.EndPoint.Y);
+            oldLine.EndPoint = new Point(oldLine.EndPoint.X, Math.Sin(phase++ / 10.0) * 100);
+            sample++;
+            if (sample >= linesPerTrace)
+            {
+                sample = 0;
             }
         }
     }
