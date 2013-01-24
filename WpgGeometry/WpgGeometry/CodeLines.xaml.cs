@@ -31,8 +31,8 @@ namespace WpgGeometry
         {
             InitializeComponent();
             generator = new SineGenerator();
-            generator.Frequency = 200;
-            generator.SamplesPerSecond = 300;
+            generator.Frequency = 2;
+            generator.SamplesPerSecond = 100;
             generator.SampleReadyEvent += AddSample;
         }
 
@@ -115,16 +115,19 @@ namespace WpgGeometry
             canvas.Children.Add(anImage);
         }
 
+        private const double XAxisMultiplier = 5.0;
+
         private void AddLines(GeometryGroup group)
         {
-            Point lastLineEnd = new Point(0.0, 0.0);
             int sample = GetPreviousSample(nextSample);
-            for (int s = 0; s < linesPerTrace; s++)
+            Point lastLineEnd = new Point((linesPerTrace - 1) * XAxisMultiplier , samples[sample]);
+
+            for (int s = linesPerTrace - 2; s >= 0; s--)
             {
-                Point thisLineEnd = new Point(s * 5, samples[sample]);
-                group.Children.Add(new LineGeometry(lastLineEnd, thisLineEnd));
-                lastLineEnd = thisLineEnd;
                 sample = GetPreviousSample(sample);
+                Point thisLineEnd = new Point(s * 5, samples[sample]);
+                group.Children.Insert(0, new LineGeometry(lastLineEnd, thisLineEnd));
+                lastLineEnd = thisLineEnd;
             }
         }
 
