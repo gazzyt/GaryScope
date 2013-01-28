@@ -57,6 +57,8 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="MainWindowViewModel.cs" />
+    <Compile Include="ReverseRingArray.cs" />
+    <Compile Include="ReverseRingArrayEnumerator.cs" />
     <Compile Include="ScopeSample.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>

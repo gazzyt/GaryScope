@@ -12,15 +12,17 @@
         private SpecifiedDevice scopeDevice;
         private bool isRunning = true;
         private byte clockSpeed = 0x0b;
+        private const int linesPerTrace = 100;
+
 
         public MainWindowViewModel()
         {
-            Trace1 = new RingArray<ScopeSample>(1000);
+            Trace1 = new ReverseRingArray(linesPerTrace);
             scopeDevice = SpecifiedDevice.FindSpecifiedDevice(0x4242, 3);
             scopeDevice.DataRecieved += OnDataReceived;
         }
 
-        public RingArray<ScopeSample> Trace1 { get; private set; }
+        public ReverseRingArray Trace1 { get; private set; }
 
         void OnDataReceived(object sender, DataRecievedEventArgs args)
         {
@@ -28,8 +30,7 @@
 
             ScopeSample newSample = new ScopeSample { Time = DateTime.Now, Value = captureval1 };
 
-            App.Current.Dispatcher.BeginInvoke(
-                new Action(() => Trace1.Add(newSample)));
+            Trace1.Add(newSample);
         }
 
         public bool IsRunning
