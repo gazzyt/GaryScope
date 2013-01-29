@@ -3,23 +3,30 @@
     using System;
     using Microsoft.Research.DynamicDataDisplay.Common;
     using UsbLibrary;
+    using GalaSoft.MvvmLight;
 
     /// <summary>
     /// TODO: Update summary.
     /// </summary>
-    public class MainWindowViewModel
+    public class MainWindowViewModel : ViewModelBase
     {
         private SpecifiedDevice scopeDevice;
         private bool isRunning = true;
         private byte clockSpeed = 0x0b;
         private const int linesPerTrace = 100;
+        private int? maxValue;
+        private int? minValue;
 
 
         public MainWindowViewModel()
         {
             Trace1 = new ReverseRingArray(linesPerTrace);
-            scopeDevice = SpecifiedDevice.FindSpecifiedDevice(0x4242, 3);
-            scopeDevice.DataRecieved += OnDataReceived;
+
+            if (!IsInDesignMode)
+            {
+                scopeDevice = SpecifiedDevice.FindSpecifiedDevice(0x4242, 3);
+                scopeDevice.DataRecieved += OnDataReceived;
+            }
         }
 
         public ReverseRingArray Trace1 { get; private set; }
@@ -31,6 +38,16 @@
             ScopeSample newSample = new ScopeSample { Time = DateTime.Now, Value = captureval1 };
 
             Trace1.Add(newSample);
+
+            if (!MinValue.HasValue || newSample.Value < MinValue.Value)
+            {
+                MinValue = newSample.Value;
+            }
+
+            if (!MaxValue.HasValue || newSample.Value > MaxValue.Value)
+            {
+                MaxValue = newSample.Value;
+            }
         }
 
         public bool IsRunning
@@ -57,20 +74,46 @@
             }
         }
 
+        public int? MaxValue
+        {
+            get { return maxValue; }
+            set
+            {
+                maxValue = value;
+                RaisePropertyChanged(() => MaxValue);
+            }
+        }
+
+        public int? MinValue
+        {
+            get { return minValue; }
+            set
+            {
+                minValue = value;
+                RaisePropertyChanged(() => MinValue);
+            }
+        }
+
         private void SetClockSpeed()
         {
-            byte[] command = new byte[2];
-            command[0] = 1;
-            command[1] = clockSpeed;
-            scopeDevice.SendData(command);
+            if (!IsInDesignMode)
+            {
+                byte[] command = new byte[2];
+                command[0] = 1;
+                command[1] = clockSpeed;
+                scopeDevice.SendData(command);
+            }
         }
 
         private void StartStopScope()
         {
-            byte[] command = new byte[2];
-            command[0] = 2;
-            command[1] = Convert.ToByte(isRunning);
-            scopeDevice.SendData(command);
+            if (!IsInDesignMode)
+            {
+                byte[] command = new byte[2];
+                command[0] = 2;
+                command[1] = Convert.ToByte(isRunning);
+                scopeDevice.SendData(command);
+            }
         }
     }
 }

@@ -1,0 +1,1 @@
+﻿<GaryScope:MainWindowViewModel xmlns:GaryScope="clr-namespace:GaryScope" MinValue="666" MaxValue="999" ClockSpeed="804.49" IsInDesignMode="False" IsInDesignModeStatic="True" IsRunning="True"/>
