@@ -4,6 +4,8 @@
     using Microsoft.Research.DynamicDataDisplay.Common;
     using UsbLibrary;
     using GalaSoft.MvvmLight;
+using System.Windows.Input;
+    using GalaSoft.MvvmLight.Command;
 
     /// <summary>
     /// TODO: Update summary.
@@ -25,7 +27,10 @@
             if (!IsInDesignMode)
             {
                 scopeDevice = SpecifiedDevice.FindSpecifiedDevice(0x4242, 3);
-                scopeDevice.DataRecieved += OnDataReceived;
+                if (scopeDevice != null)
+                {
+                    scopeDevice.DataRecieved += OnDataReceived;
+                }
             }
         }
 
@@ -91,6 +96,19 @@
             {
                 minValue = value;
                 RaisePropertyChanged(() => MinValue);
+            }
+        }
+
+        public ICommand ResetMaxMinCommand
+        {
+            get
+            {
+                return new RelayCommand(
+                    () => 
+                    { 
+                        MaxValue = null; 
+                        MinValue = null; 
+                    });
             }
         }
 

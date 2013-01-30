@@ -12,6 +12,7 @@
         <StackPanel Grid.Row="0" Orientation="Horizontal">
         	<CheckBox Content="Run" IsChecked="{Binding IsRunning, Mode=TwoWay}"/>
         	<Slider Maximum="15" SmallChange="1" TickPlacement="TopLeft" Width="100" AutoToolTipPlacement="TopLeft" Value="{Binding ClockSpeed, Mode=TwoWay}"/>
+            <Button Content="Reset" Command="{Binding ResetMaxMinCommand}" VerticalAlignment="Top"/>
             <TextBlock Text="{Binding MinValue}" TextAlignment="Right" Background="Red" Width="30" VerticalAlignment="Top" HorizontalAlignment="Center" Padding="0,0,4,0"/>
             <TextBlock Text="{Binding MaxValue}" Background="Green" Width="30" VerticalAlignment="Top" TextAlignment="Right" Padding="0,0,4,0"/>
         </StackPanel>
