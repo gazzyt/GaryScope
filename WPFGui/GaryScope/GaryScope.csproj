@@ -107,10 +107,6 @@
       <Project>{71E42A6D-C432-4C03-BF4F-ABFD2A3173E0}</Project>
       <Name>UsbLibrary</Name>
     </ProjectReference>
-    <ProjectReference Include="..\DynamicDataDisplay\DynamicDataDisplay.csproj">
-      <Project>{ECD37682-DF7E-409F-912D-0965634556B5}</Project>
-      <Name>DynamicDataDisplay</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <DesignData Include="SampleData\MainWindowViewModelSampleData.xaml" />

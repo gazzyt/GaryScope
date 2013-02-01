@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Windows;
-
-using Microsoft.Research.DynamicDataDisplay.DataSources;
-using Microsoft.Research.DynamicDataDisplay;
 using System.Threading;
-using System.Windows.Controls;
+using System.Windows;
 using System.Windows.Media;
 
 namespace GaryScope
