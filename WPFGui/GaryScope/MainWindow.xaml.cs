@@ -17,6 +17,7 @@ namespace GaryScope
         private MainWindowViewModel viewModel;
         private Timer redrawTimer;
         private GeometryGroup lines;
+        private const UInt16 MaxSample = 1024;
 
         public MainWindow()
         {
@@ -116,17 +117,22 @@ namespace GaryScope
             {
                 if (firstSample)
                 {
-                    lastLineEnd = new Point(reverseIndex * XAxisMultiplier, sample.Value);
+                    lastLineEnd = new Point(reverseIndex * XAxisMultiplier, ScaleY(sample.Value));
                     firstSample = false;
                 }
                 else
                 {
-                    Point thisLineEnd = new Point(reverseIndex * XAxisMultiplier, sample.Value);
+                    Point thisLineEnd = new Point(reverseIndex * XAxisMultiplier, ScaleY(sample.Value));
                     group.Children.Insert(0, new LineGeometry(lastLineEnd, thisLineEnd));
                     lastLineEnd = thisLineEnd;
                 }
                 reverseIndex--;
             }
+        }
+
+        private static int ScaleY(UInt16 y)
+        {
+            return (MaxSample - y) >> 1;
         }
     }
 }

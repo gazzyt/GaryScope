@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 		xmlns:c="http://research.microsoft.com/DynamicDataDisplay/1.0"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" x:Class="GaryScope.MainWindow"
-        Title="MainWindow" Height="550" Width="525" Loaded="Window_Loaded">
+        Title="MainWindow" Height="650" Width="525" Loaded="Window_Loaded">
     <Grid d:DataContext="{d:DesignData /SampleData/MainWindowViewModelSampleData.xaml}">
     	<Grid.RowDefinitions>
     		<RowDefinition Height="100"/>
