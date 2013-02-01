@@ -1,11 +1,10 @@
 ﻿namespace GaryScope
 {
     using System;
-    using Microsoft.Research.DynamicDataDisplay.Common;
-    using UsbLibrary;
+    using System.Windows.Input;
     using GalaSoft.MvvmLight;
-using System.Windows.Input;
     using GalaSoft.MvvmLight.Command;
+    using UsbLibrary;
 
     /// <summary>
     /// TODO: Update summary.
