@@ -2,6 +2,7 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 		xmlns:c="http://research.microsoft.com/DynamicDataDisplay/1.0"
+     xmlns:local="clr-namespace:GaryScope"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" x:Class="GaryScope.MainWindow"
         Title="MainWindow" Height="650" Width="525" Loaded="Window_Loaded">
     <Grid d:DataContext="{d:DesignData /SampleData/MainWindowViewModelSampleData.xaml}">
@@ -17,7 +18,7 @@
             <TextBlock Text="{Binding MaxValue}" Background="Green" Width="30" VerticalAlignment="Top" TextAlignment="Right" Padding="0,0,4,0"/>
         </StackPanel>
         
-        <Canvas Background="Aqua" x:Name="canvas" Grid.Row="1"/>
+        <local:DrawingCanvas Background="Aqua" x:Name="canvas" Grid.Row="1"/>
 
     </Grid>
 </Window>

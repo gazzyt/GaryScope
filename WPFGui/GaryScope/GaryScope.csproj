@@ -59,6 +59,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="DrawingCanvas.cs" />
     <Compile Include="MainWindowViewModel.cs" />
     <Compile Include="ReverseRingArray.cs" />
     <Compile Include="ReverseRingArrayEnumerator.cs" />

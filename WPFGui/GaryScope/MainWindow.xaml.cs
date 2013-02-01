@@ -39,6 +39,8 @@ namespace GaryScope
 
         private void DrawScene()
         {
+            DrawLines();
+            return;
             // 
             // Create the Geometry to draw. 
             //
@@ -128,6 +130,38 @@ namespace GaryScope
                 }
                 reverseIndex--;
             }
+        }
+
+        private void DrawLines()
+        {
+            DrawingVisual dv = new DrawingVisual();
+            using (DrawingContext dc = dv.RenderOpen())
+            {
+                Pen dp = new Pen(Brushes.Black, 1);
+                Point lastLineEnd = new Point();
+                bool firstSample = true;
+                int reverseIndex = viewModel.Trace1.Capacity - 1;
+
+                foreach (var sample in viewModel.Trace1)
+                {
+                    if (firstSample)
+                    {
+                        lastLineEnd = new Point(reverseIndex * XAxisMultiplier, ScaleY(sample.Value));
+                        firstSample = false;
+                    }
+                    else
+                    {
+                        Point thisLineEnd = new Point(reverseIndex * XAxisMultiplier, ScaleY(sample.Value));
+                        dc.DrawLine(dp, lastLineEnd, thisLineEnd);
+                        lastLineEnd = thisLineEnd;
+                    }
+                    reverseIndex--;
+                }
+            
+            }
+
+            canvas.ClearVisuals();
+            canvas.AddVisual(dv);
         }
 
         private static int ScaleY(UInt16 y)
