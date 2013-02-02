@@ -37,7 +37,7 @@
 
         void OnDataReceived(object sender, DataRecievedEventArgs args)
         {
-            UInt16 captureval1 = (UInt16)((args.data[1] + args.data[2] * 256) * 0.92f);
+            UInt16 captureval1 = (UInt16)(args.data[1] + args.data[2] * 256);
 
             ScopeSample newSample = new ScopeSample { Time = DateTime.Now, Value = captureval1 };
 
