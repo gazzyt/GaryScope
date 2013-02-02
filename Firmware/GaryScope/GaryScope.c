@@ -162,7 +162,8 @@ static void timerInit(void)
 
 static void adcInit(void)
 {
-    ADMUX = UTIL_BIN8(1001, 0011);  /* Vref=2.56V, measure ADC0 */
+    ADMUX = UTIL_BIN8(0, 0011);  /* Vref=Vcc, measure ADC0 */
+    //ADMUX = UTIL_BIN8(1001, 0011);  /* Vref=2.56V, measure ADC0 */
     ADCSRA = UTIL_BIN8(1000, 0111); /* enable ADC, not free running, interrupt disable, rate = 1/128 */
 }
 
