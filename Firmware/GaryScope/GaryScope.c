@@ -18,16 +18,13 @@
 
 /*
 Pin assignment:
-PB1 = key input (active low with pull-up)
-PB3 = analog input (ADC3)
-PB4 = LED output (active high)
+PB1 (pin 6) = LED output (active high)
+PB3 (pin 2) = analog input (ADC3)
 
-PB0, PB2 = USB data lines
+PB0 (pin 5), PB2 (pin 7) = USB data lines
 */
 
-#define BIT_LED 4
-#define BIT_KEY 1
-
+#define BIT_LED 1
 
 #define UTIL_BIN4(x)        (uchar)((0##x & 01000)/64 + (0##x & 0100)/16 + (0##x & 010)/4 + (0##x & 1))
 #define UTIL_BIN8(hi, lo)   (uchar)(UTIL_BIN4(hi) * 16 + UTIL_BIN4(lo))
@@ -113,19 +110,7 @@ static void SetClock(uchar *data, uchar len)
 
 /* ------------------------------------------------------------------------- */
 
-static void keyPoll(void)
-{
-static uchar    keyMirror;
-uchar           key;
 
-    key = PINB & (1 << BIT_KEY);
-    if(keyMirror != key){   /* status changed */
-        keyMirror = key;
-        if(!key){           /* key was pressed */
-            setIsRecording(!isRecording);
-        }
-    }
-}
 
 static void adcPoll(void)
 {
@@ -141,7 +126,6 @@ static uchar timerCnt;
 
     if(TIFR & (1 << TOV1)){
         TIFR = (1 << TOV1); /* clear overflow */
-        keyPoll();
         if(++timerCnt >= 63){       /* ~ 1 second interval */
             timerCnt = 0;
             if(isRecording){
@@ -304,7 +288,6 @@ uchar   calibrationValue;
     }
     usbDeviceConnect();
     DDRB |= 1 << BIT_LED;   /* output for LED */
-    PORTB |= 1 << BIT_KEY;  /* pull-up on key input */
     wdt_enable(WDTO_1S);
     timerInit();
     adcInit();
