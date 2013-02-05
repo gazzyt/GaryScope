@@ -60,10 +60,12 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="DrawingCanvas.cs" />
+    <Compile Include="IScopeDevice.cs" />
     <Compile Include="MainWindowViewModel.cs" />
     <Compile Include="ReverseRingArray.cs" />
     <Compile Include="ReverseRingArrayEnumerator.cs" />
     <Compile Include="ScopeSample.cs" />
+    <Compile Include="UsbScopeDevice.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

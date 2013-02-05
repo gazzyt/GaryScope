@@ -4,14 +4,13 @@
     using System.Windows.Input;
     using GalaSoft.MvvmLight;
     using GalaSoft.MvvmLight.Command;
-    using UsbLibrary;
 
     /// <summary>
     /// TODO: Update summary.
     /// </summary>
     public class MainWindowViewModel : ViewModelBase
     {
-        private SpecifiedDevice scopeDevice;
+        private IScopeDevice scopeDevice;
         private bool isRunning = true;
         private byte clockSpeed = 0x0b;
         private const int linesPerTrace = 100;
@@ -25,19 +24,17 @@
 
             if (!IsInDesignMode)
             {
-                scopeDevice = SpecifiedDevice.FindSpecifiedDevice(0x4242, 3);
-                if (scopeDevice != null)
-                {
-                    scopeDevice.DataRecieved += OnDataReceived;
-                }
+                scopeDevice = new UsbScopeDevice();
+                scopeDevice.DataReceived +=new Action<byte[]>(OnDataReceived);
             }
+
         }
 
         public ReverseRingArray Trace1 { get; private set; }
 
-        void OnDataReceived(object sender, DataRecievedEventArgs args)
+        void OnDataReceived(byte[] data)
         {
-            UInt16 captureval1 = (UInt16)(args.data[1] + args.data[2] * 256);
+            UInt16 captureval1 = (UInt16)(data[1] + data[2] * 256);
 
             ScopeSample newSample = new ScopeSample { Time = DateTime.Now, Value = captureval1 };
 
