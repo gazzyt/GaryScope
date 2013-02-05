@@ -121,6 +121,11 @@ TcfTransactionLog.csv
 *.atsuo
 
 ############
+## KiCAD
+############
+*-cache.lib
+
+############
 ## Windows
 ############
 

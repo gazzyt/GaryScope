@@ -1,4 +1,4 @@
-EESchema Schematic File Version 2  date 03/02/2013 19:48:39
+EESchema Schematic File Version 2  date 05/02/2013 21:55:47
 LIBS:power
 LIBS:device
 LIBS:transistors
@@ -29,14 +29,13 @@ LIBS:opto
 LIBS:atmel
 LIBS:contrib
 LIBS:valves
-LIBS:GaryScope-cache
 EELAYER 25  0
 EELAYER END
 $Descr User 7000 5000
 encoding utf-8
 Sheet 1 1
 Title "ATTINY85 Oscilloscope"
-Date "3 feb 2013"
+Date "5 feb 2013"
 Rev ""
 Comp ""
 Comment1 ""
@@ -208,7 +207,7 @@ L CP1 C2
 U 1 1 50F411C6
 P 4100 1500
 F 0 "C2" H 4150 1600 50  0000 L CNN
-F 1 "10uF" H 4150 1400 50  0000 L CNN
+F 1 "47uF" H 4150 1400 50  0000 L CNN
 	1    4100 1500
 	1    0    0    -1  
 $EndComp
