@@ -24,7 +24,8 @@
 
             if (!IsInDesignMode)
             {
-                scopeDevice = new UsbScopeDevice();
+                //scopeDevice = new UsbScopeDevice();
+                scopeDevice = new MockScopeDevice();
                 scopeDevice.DataReceived +=new Action<byte[]>(OnDataReceived);
             }
 
