@@ -13,10 +13,14 @@ namespace GaryScope
         private MainWindowViewModel viewModel;
         private Timer redrawTimer;
         private const UInt16 MaxSample = 1024;
+        private Pen[] pens;
 
         public MainWindow()
         {
             InitializeComponent();
+            pens = new Pen[2];
+            pens[0] = new Pen(Brushes.Red, 1);
+            pens[1] = new Pen(Brushes.Blue, 1);
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -44,10 +48,11 @@ namespace GaryScope
             DrawingVisual dv = new DrawingVisual();
             using (DrawingContext dc = dv.RenderOpen())
             {
-                Pen dp = new Pen(Brushes.Black, 1);
+                //Pen dp = new Pen(Brushes.Black, 1);
                 Point lastLineEnd = new Point();
                 bool firstSample = true;
                 int reverseIndex = viewModel.Trace1.Capacity - 1;
+                int penIndex = 0;
 
                 foreach (var sample in viewModel.Trace1)
                 {
@@ -59,8 +64,9 @@ namespace GaryScope
                     else
                     {
                         Point thisLineEnd = new Point(reverseIndex * XAxisMultiplier, ScaleY(sample.Value));
-                        dc.DrawLine(dp, lastLineEnd, thisLineEnd);
+                        dc.DrawLine(pens[penIndex], lastLineEnd, thisLineEnd);
                         lastLineEnd = thisLineEnd;
+                        penIndex ^= 1;
                     }
                     reverseIndex--;
                 }
