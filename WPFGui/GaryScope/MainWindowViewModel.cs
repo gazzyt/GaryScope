@@ -4,6 +4,7 @@
     using System.Windows.Input;
     using GalaSoft.MvvmLight;
     using GalaSoft.MvvmLight.Command;
+    using System.Threading;
 
     /// <summary>
     /// TODO: Update summary.
@@ -16,6 +17,9 @@
         private const int linesPerTrace = 100;
         private int? maxValue;
         private int? minValue;
+        private long samplesInLastPeriod = 0;
+        private long samplesSinceBeginLastPeriod = 0;
+        private Timer periodTimer;
 
 
         public MainWindowViewModel()
@@ -29,6 +33,7 @@
                 scopeDevice.DataReceived +=new Action<byte[]>(OnDataReceived);
             }
 
+            periodTimer = new Timer(PeriodTimerTick, null, 0, 1000);
         }
 
         public ReverseRingArray Trace1 { get; private set; }
@@ -40,6 +45,8 @@
             ScopeSample newSample = new ScopeSample { Time = DateTime.Now, Value = captureval1 };
 
             Trace1.Add(newSample);
+
+            Interlocked.Increment(ref samplesSinceBeginLastPeriod);
 
             if (!MinValue.HasValue || newSample.Value < MinValue.Value)
             {
@@ -96,6 +103,16 @@
             }
         }
 
+        public long SamplesInLastPeriod
+        {
+            get { return samplesInLastPeriod; }
+            set
+            {
+                samplesInLastPeriod = value;
+                RaisePropertyChanged(() => SamplesInLastPeriod);
+            }
+        }
+
         public ICommand ResetMaxMinCommand
         {
             get
@@ -129,6 +146,12 @@
                 command[1] = Convert.ToByte(isRunning);
                 scopeDevice.SendData(command);
             }
+        }
+
+        private void PeriodTimerTick(object state = null)
+        {
+            SamplesInLastPeriod = samplesSinceBeginLastPeriod;
+            samplesSinceBeginLastPeriod = 0;
         }
     }
 }

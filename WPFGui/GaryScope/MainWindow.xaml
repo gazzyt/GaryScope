@@ -16,6 +16,7 @@
             <Button Content="Reset" Command="{Binding ResetMaxMinCommand}" VerticalAlignment="Top"/>
             <TextBlock Text="{Binding MinValue}" TextAlignment="Right" Background="Red" Width="30" VerticalAlignment="Top" HorizontalAlignment="Center" Padding="0,0,4,0"/>
             <TextBlock Text="{Binding MaxValue}" Background="Green" Width="30" VerticalAlignment="Top" TextAlignment="Right" Padding="0,0,4,0"/>
+            <TextBlock Text="{Binding SamplesInLastPeriod}"/>
         </StackPanel>
         <Canvas Grid.Row="1" Height="512" VerticalAlignment="Top">
         	<Line X1="0" Y1="0" Y2="0" Stroke="Black" X2="500"/>
