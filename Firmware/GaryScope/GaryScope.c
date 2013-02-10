@@ -5,6 +5,7 @@
  *  Author: garyt
  */ 
 
+#include "usbdrv.h"
 
 #include <avr/io.h>
 #include <avr/wdt.h>
@@ -13,7 +14,6 @@
 #include <avr/pgmspace.h>
 #include <util/delay.h>
 
-#include "usbdrv.h"
 #include "oddebug.h"
 
 /*
@@ -26,6 +26,8 @@ PB0 (pin 5), PB2 (pin 7) = USB data lines
 
 #define BIT_LED 1
 
+#define NUM_SAMPLES_PER_REPORT 4
+
 #define UTIL_BIN4(x)        (uchar)((0##x & 01000)/64 + (0##x & 0100)/16 + (0##x & 010)/4 + (0##x & 1))
 #define UTIL_BIN8(hi, lo)   (uchar)(UTIL_BIN4(hi) * 16 + UTIL_BIN4(lo))
 
@@ -35,7 +37,8 @@ PB0 (pin 5), PB2 (pin 7) = USB data lines
 
 /* ------------------------------------------------------------------------- */
 
-static uchar    reportBuffer[4];    /* buffer for HID reports */
+static unsigned int    reportBuffer[NUM_SAMPLES_PER_REPORT];    /* buffer for HID reports */
+static int		nextSampleIndex = 0;
 static uchar    idleRate;           /* in 4 ms units */
 
 static uchar    adcPending;
@@ -54,7 +57,7 @@ const PROGMEM char usbHidReportDescriptor[USB_CFG_HID_REPORT_DESCRIPTOR_LENGTH] 
     0x15, 0x00,                    //   LOGICAL_MINIMUM (0)
     0x26, 0xff, 0x00,              //   LOGICAL_MAXIMUM (255)
     0x75, 0x08,                    //   REPORT_SIZE (8)
-    0x95, 0x04,                    //   REPORT_COUNT (2)
+    0x95, (char)NUM_SAMPLES_PER_REPORT * sizeof(unsigned int),                    //   REPORT_COUNT (2)
 	0x09, 0x00,					   //   USAGE (undefined)
     0x82, 0x02, 0x01,              //   INPUT (Data,Var,Abs,Buf)
     0x75, 0x08,                    //   REPORT_SIZE (8)
@@ -77,10 +80,15 @@ const PROGMEM char usbHidReportDescriptor[USB_CFG_HID_REPORT_DESCRIPTOR_LENGTH] 
 
 static void evaluateADC(unsigned int value)
 {
-	*(unsigned int *)reportBuffer = value;
-	//reportBuffer[0] = 12;
-	//reportBuffer[1] = 34;
-	adcValueToSend = 1;
+	if (nextSampleIndex < NUM_SAMPLES_PER_REPORT)
+	{
+		reportBuffer[nextSampleIndex++] = value;
+
+		if (nextSampleIndex >= NUM_SAMPLES_PER_REPORT)
+		{
+			adcValueToSend = 1;
+		}
+	}	
 }
 
 /* ------------------------------------------------------------------------- */
@@ -183,7 +191,7 @@ uchar	usbFunctionSetup(uchar data[8])
 {
 usbRequest_t    *rq = (void *)data;
 
-    usbMsgPtr = reportBuffer;
+    usbMsgPtr = (uchar *)reportBuffer;
     if((rq->bmRequestType & USBRQ_TYPE_MASK) == USBRQ_TYPE_CLASS){    /* class request type */
         if(rq->bRequest == USBRQ_HID_GET_REPORT){  /* wValue: ReportType (highbyte), ReportID (lowbyte) */
             /* we only have one report type, so don't look at wValue */
@@ -297,8 +305,9 @@ uchar   calibrationValue;
         wdt_reset();
         usbPoll();
         if(usbInterruptIsReady() && adcValueToSend != 0){ /* we can send another key */
-            usbSetInterrupt(reportBuffer, sizeof(reportBuffer));
+            usbSetInterrupt((uchar *)reportBuffer, sizeof(reportBuffer));
 			adcValueToSend = 0;
+			nextSampleIndex = 0;
         }
         timerPoll();
         adcPoll();

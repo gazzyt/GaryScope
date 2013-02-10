@@ -28,8 +28,8 @@
 
             if (!IsInDesignMode)
             {
-                //scopeDevice = new UsbScopeDevice();
-                scopeDevice = new MockScopeDevice();
+                scopeDevice = new UsbScopeDevice();
+                //scopeDevice = new MockScopeDevice();
                 scopeDevice.DataReceived +=new Action<byte[]>(OnDataReceived);
             }
 
@@ -40,7 +40,18 @@
 
         void OnDataReceived(byte[] data)
         {
-            UInt16 captureval1 = (UInt16)(data[1] + data[2] * 256);
+            int sampleIndex = 1;
+
+            while (sampleIndex < data.Length)
+            {
+                OnSampleReceived(data[sampleIndex], data[sampleIndex + 1]);
+                sampleIndex += 2;
+            }
+        }
+
+        void OnSampleReceived(byte lowByte, byte highByte)
+        {
+            UInt16 captureval1 = (UInt16)(lowByte + highByte * 256);
 
             ScopeSample newSample = new ScopeSample { Time = DateTime.Now, Value = captureval1 };
 
