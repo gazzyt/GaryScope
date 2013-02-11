@@ -4,7 +4,7 @@
 		xmlns:c="http://research.microsoft.com/DynamicDataDisplay/1.0"
      xmlns:local="clr-namespace:GaryScope"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" x:Class="GaryScope.MainWindow"
-        Title="MainWindow" Height="650" Width="525" Loaded="Window_Loaded">
+        Title="MainWindow" Height="700" Width="600" Loaded="Window_Loaded">
     <Grid d:DataContext="{d:DesignData /SampleData/MainWindowViewModelSampleData.xaml}">
     	<Grid.RowDefinitions>
     		<RowDefinition Height="100"/>
@@ -18,16 +18,22 @@
             <TextBlock Text="{Binding MaxValue}" Background="Green" Width="30" VerticalAlignment="Top" TextAlignment="Right" Padding="0,0,4,0"/>
             <TextBlock Text="{Binding SamplesInLastPeriod}"/>
         </StackPanel>
-        <Canvas Grid.Row="1" Height="512" VerticalAlignment="Top">
-        	<Line X1="0" Y1="0" Y2="0" Stroke="Black" X2="500"/>
-        	<Line X1="0" Y1="102.4" Y2="102.4" Stroke="Black" X2="500"/>
-        	<Line X1="0" Y1="204.8" Y2="204.8" Stroke="Black" X2="500"/>
-        	<Line X1="0" Y1="307.2" Y2="307.2" Stroke="Black" X2="500"/>
-        	<Line X1="0" Y1="409.6" Y2="409.6" Stroke="Black" X2="500"/>
-        	<Line X1="0" Y1="512" Y2="512" Stroke="Black" X2="500"/>
+        <Canvas x:Name="canvas1" Grid.Row="1" Height="512" VerticalAlignment="Top">
+        	<Line X1="0" Y1="0" Y2="0" Stroke="Black" X2="{Binding ActualWidth, ElementName=canvas1}"/>
+        	<Line X1="0" Y1="102.4" Y2="102.4" Stroke="Black" X2="{Binding ActualWidth, ElementName=canvas1}"/>
+        	<Line X1="0" Y1="204.8" Y2="204.8" Stroke="Black" X2="{Binding ActualWidth, ElementName=canvas1}"/>
+        	<Line X1="0" Y1="307.2" Y2="307.2" Stroke="Black" X2="{Binding ActualWidth, ElementName=canvas1}"/>
+        	<Line X1="0" Y1="409.6" Y2="409.6" Stroke="Black" X2="{Binding ActualWidth, ElementName=canvas1}"/>
+        	<Line X1="0" Y1="512" Y2="512" Stroke="Black" X2="{Binding ActualWidth, ElementName=canvas1}"/>
+        	<TextBlock TextWrapping="Wrap" Text="5V"/>
+        	<TextBlock TextWrapping="Wrap" Text="4V" Canvas.Top="102.9"/>
+        	<TextBlock TextWrapping="Wrap" Text="3V" Canvas.Top="205.3"/>
+        	<TextBlock TextWrapping="Wrap" Text="2V" Canvas.Top="307.7"/>
+        	<TextBlock TextWrapping="Wrap" Text="1V" Canvas.Top="410.1"/>
+        	<TextBlock TextWrapping="Wrap" Text="0V" Canvas.Top="512.5"/>
         </Canvas>
         
-        <local:DrawingCanvas x:Name="canvas" Grid.Row="1"/>
+        <local:DrawingCanvas x:Name="canvas" Grid.Row="1" Margin="20,0,0,20" />
 
     </Grid>
 </Window>
