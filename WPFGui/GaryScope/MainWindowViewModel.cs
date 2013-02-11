@@ -6,11 +6,14 @@
     using GalaSoft.MvvmLight.Command;
     using System.Threading;
 
+
     /// <summary>
     /// TODO: Update summary.
     /// </summary>
     public class MainWindowViewModel : ViewModelBase
     {
+        private bool useMockScopeDevice = true;
+
         private IScopeDevice scopeDevice;
         private bool isRunning = true;
         private byte clockSpeed = 0x0b;
@@ -28,8 +31,15 @@
 
             if (!IsInDesignMode)
             {
-                scopeDevice = new UsbScopeDevice();
-                //scopeDevice = new MockScopeDevice();
+                if (useMockScopeDevice)
+                {
+                    scopeDevice = new MockScopeDevice();
+                }
+                else
+                {
+                    scopeDevice = new UsbScopeDevice();
+                }
+
                 scopeDevice.DataReceived +=new Action<byte[]>(OnDataReceived);
             }
 
