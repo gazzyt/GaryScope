@@ -43,7 +43,17 @@ namespace GaryScope
 
         public void SendData(byte[] data)
         {
-            // do nothing
+            if (data[0] == 2)
+            {
+                if (data[1] == 0)
+                {
+                    sineGenerator.Stop();
+                }
+                else
+                {
+                    sineGenerator.Start();
+                }
+            }
         }
     }
 }
