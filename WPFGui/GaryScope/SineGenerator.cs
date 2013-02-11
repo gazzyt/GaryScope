@@ -20,8 +20,8 @@ using System.Threading;
         public SineGenerator()
         {
             // Sensible defaults
-            Frequency = 300.0;
-            SamplesPerSecond = 1000;
+            Frequency = 3.0;
+            SamplesPerSecond = 50;
         }
 
         public double Frequency 
@@ -36,7 +36,7 @@ using System.Threading;
 
         private void UpdateRadiansPerTick()
         {
-            radiansPerTick = Math.PI * frequency / samplesPerSecond;
+            radiansPerTick = 2 * Math.PI * frequency / samplesPerSecond;
         }
 
         public int SamplesPerSecond 
