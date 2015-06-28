@@ -1,0 +1,5 @@
+<Application x:Class="WinRTGui.App" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:local="using:WinRTGui" RequestedTheme="Light">
+  <Application.Resources>
+    <vm:ViewModelLocator x:Key="Locator" xmlns:vm="using:WinRTGui.ViewModel" />
+  </Application.Resources>
+</Application>
