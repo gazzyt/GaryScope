@@ -22,7 +22,7 @@
             <TextBlock Text="{Binding MaxValue}" Width="30" VerticalAlignment="Top" TextAlignment="Right" Padding="0,0,4,0"/>
             <TextBlock Text="{Binding SamplesInLastPeriod}"/>
         </StackPanel>
-        <canvas:CanvasControl x:Name="canvas1" Grid.Row="1" Height="512" VerticalAlignment="Top" Draw="canvas1_Draw">
+        <canvas:CanvasControl x:Name="canvas1" Grid.Row="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Draw="canvas1_Draw" SizeChanged="canvas1_SizeChanged" Margin="10" CreateResources="canvas1_CreateResources">
         </canvas:CanvasControl>
 
     </Grid>
