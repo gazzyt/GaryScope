@@ -1,9 +1,11 @@
-﻿using Microsoft.Graphics.Canvas.Text;
+﻿using GalaSoft.MvvmLight.Threading;
+using Microsoft.Graphics.Canvas.Text;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading;
 using Windows.Foundation;
@@ -48,10 +50,6 @@ namespace WinRTGui
         public MainPage()
         {
             this.InitializeComponent();
-        }
-
-        private void Window_Loaded(object sender, RoutedEventArgs e)
-        {
             viewModel = new MainWindowViewModel();
             this.DataContext = viewModel;
             redrawTimer = new Timer(RedrawTimerTick, null, 0, 50);
@@ -59,8 +57,7 @@ namespace WinRTGui
 
         private void RedrawTimerTick(object state = null)
         {
-            //this.Dispatcher.BeginInvoke(
-            //    new Action(() => this.DrawScene()));
+            DispatcherHelper.CheckBeginInvokeOnUI(() => canvas1.Invalidate());
         }
 
         public void RecalculateLayout()
@@ -72,43 +69,35 @@ namespace WinRTGui
 
         private void DrawScene()
         {
-            DrawLines();
+            //DrawLines();
         }
 
         private const double XAxisMultiplier = 5.0;
 
-        private void DrawLines()
+        private void DrawLines(CanvasDrawEventArgs args)
         {
-            //DrawingVisual dv = new DrawingVisual();
-            //using (DrawingContext dc = dv.RenderOpen())
-            //{
-            //    //Pen dp = new Pen(Brushes.Black, 1);
-            //    Point lastLineEnd = new Point();
-            //    bool firstSample = true;
-            //    int reverseIndex = viewModel.Trace1.Capacity - 1;
-            //    int penIndex = 0;
+            Vector2 lastLineEnd = new Vector2();
+            bool firstSample = true;
+            int reverseIndex = viewModel.Trace1.Capacity - 1;
+            int penIndex = 0;
 
-            //    foreach (var sample in viewModel.Trace1)
-            //    {
-            //        if (firstSample)
-            //        {
-            //            lastLineEnd = new Point(reverseIndex * XAxisMultiplier, ScaleY(sample.Value));
-            //            firstSample = false;
-            //        }
-            //        else
-            //        {
-            //            Point thisLineEnd = new Point(reverseIndex * XAxisMultiplier, ScaleY(sample.Value));
-            //            dc.DrawLine(pens[penIndex], lastLineEnd, thisLineEnd);
-            //            lastLineEnd = thisLineEnd;
-            //            penIndex ^= 1;
-            //        }
-            //        reverseIndex--;
-            //    }
+            foreach (var sample in viewModel.Trace1)
+            {
+                if (firstSample)
+                {
+                    lastLineEnd = new Vector2((float)(reverseIndex * XAxisMultiplier), ScaleY(sample.Value));
+                    firstSample = false;
+                }
+                else
+                {
+                    Vector2 thisLineEnd = new Vector2((float)(reverseIndex * XAxisMultiplier), ScaleY(sample.Value));
+                    args.DrawingSession.DrawLine(lastLineEnd, thisLineEnd, Colors.Black);
+                    lastLineEnd = thisLineEnd;
+                    penIndex ^= 1;
+                }
+                reverseIndex--;
+            }
 
-            //}
-
-            //canvas.ClearVisuals();
-            //canvas.AddVisual(dv);
         }
 
         private static int ScaleY(UInt16 y)
@@ -131,6 +120,8 @@ namespace WinRTGui
             DrawVoltageText(args, 3, VoltageText3);
             DrawVoltageText(args, 4, VoltageText4);
             DrawVoltageText(args, 5, VoltageText5);
+
+            DrawLines(args);
         }
 
         private float CalculateVoltageLineHeight(int indexFromTop)

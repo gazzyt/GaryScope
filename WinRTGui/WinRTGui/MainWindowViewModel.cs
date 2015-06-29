@@ -5,6 +5,8 @@
     using GalaSoft.MvvmLight;
     using GalaSoft.MvvmLight.Command;
     using System.Threading;
+    using GalaSoft.MvvmLight.Threading;
+
 
 
     /// <summary>
@@ -69,15 +71,19 @@
 
             Interlocked.Increment(ref samplesSinceBeginLastPeriod);
 
-            if (!MinValue.HasValue || newSample.Value < MinValue.Value)
+            DispatcherHelper.CheckBeginInvokeOnUI(() =>
             {
-                MinValue = newSample.Value;
-            }
 
-            if (!MaxValue.HasValue || newSample.Value > MaxValue.Value)
-            {
-                MaxValue = newSample.Value;
-            }
+               if (!MinValue.HasValue || newSample.Value < MinValue.Value)
+               {
+                   MinValue = newSample.Value;
+               }
+
+               if (!MaxValue.HasValue || newSample.Value > MaxValue.Value)
+               {
+                   MaxValue = newSample.Value;
+               }
+            });
         }
 
         public bool IsRunning
@@ -171,8 +177,9 @@
 
         private void PeriodTimerTick(object state = null)
         {
-            SamplesInLastPeriod = samplesSinceBeginLastPeriod;
+            var samples = samplesSinceBeginLastPeriod;
             samplesSinceBeginLastPeriod = 0;
+            DispatcherHelper.CheckBeginInvokeOnUI(() => SamplesInLastPeriod = samples);
         }
     }
 }

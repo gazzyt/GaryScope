@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GalaSoft.MvvmLight.Threading;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -55,6 +56,7 @@ namespace WinRTGui
                 this.DebugSettings.EnableFrameRateCounter = true;
             }
 #endif
+            DispatcherHelper.Initialize();
 
             Frame rootFrame = Window.Current.Content as Frame;
 
