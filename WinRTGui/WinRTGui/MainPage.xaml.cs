@@ -85,12 +85,12 @@ namespace WinRTGui
             {
                 if (firstSample)
                 {
-                    lastLineEnd = new Vector2((float)(reverseIndex * XAxisMultiplier), ScaleY(sample.Value));
+                    lastLineEnd = SampleToVector(reverseIndex, sample.Value);
                     firstSample = false;
                 }
                 else
                 {
-                    Vector2 thisLineEnd = new Vector2((float)(reverseIndex * XAxisMultiplier), ScaleY(sample.Value));
+                    Vector2 thisLineEnd = SampleToVector(reverseIndex, sample.Value);
                     args.DrawingSession.DrawLine(lastLineEnd, thisLineEnd, Colors.Black);
                     lastLineEnd = thisLineEnd;
                     penIndex ^= 1;
@@ -98,6 +98,11 @@ namespace WinRTGui
                 reverseIndex--;
             }
 
+        }
+
+        private Vector2 SampleToVector(int index, ushort value)
+        {
+            return new Vector2((float)(index * XAxisMultiplier) + GraphLeftMargin, ScaleY(value));
         }
 
         private static int ScaleY(UInt16 y)
