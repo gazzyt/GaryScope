@@ -39,6 +39,7 @@ namespace WinRTGui
 
         private float VoltageLineSpacing;
         private float VoltageLineEnd;
+        private float VoltageYScale;
         private CanvasTextLayout VoltageText0;
         private CanvasTextLayout VoltageText1;
         private CanvasTextLayout VoltageText2;
@@ -64,7 +65,7 @@ namespace WinRTGui
         {
             VoltageLineSpacing = (float)(canvas1.ActualHeight - GraphTopMargin - GraphBottomMargin) / 5;
             VoltageLineEnd = (float)canvas1.ActualWidth;
-
+            VoltageYScale = (float)((canvas1.ActualHeight - GraphTopMargin - GraphBottomMargin) / MaxSample);
         }
 
         private void DrawScene()
@@ -105,9 +106,9 @@ namespace WinRTGui
             return new Vector2((float)(index * XAxisMultiplier) + GraphLeftMargin, ScaleY(value));
         }
 
-        private static int ScaleY(UInt16 y)
+        private float ScaleY(UInt16 y)
         {
-            return (MaxSample - y) >> 1;
+            return (MaxSample - y) * VoltageYScale + GraphTopMargin;
         }
 
         private void canvas1_Draw(CanvasControl sender, CanvasDrawEventArgs args)
