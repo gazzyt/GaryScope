@@ -8,6 +8,8 @@
     public interface IScopeDevice
     {
         event Action<byte[]> DataReceived;
+        event Action Connected;
+        event Action Disconnected;
         void SendData(byte[] data);
     }
 }

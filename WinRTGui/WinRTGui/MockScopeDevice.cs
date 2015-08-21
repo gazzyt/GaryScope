@@ -40,6 +40,8 @@ namespace WinRTGui
         }
 
         public event Action<byte[]> DataReceived;
+        public event Action Connected;
+        public event Action Disconnected;
 
         public void SendData(byte[] data)
         {

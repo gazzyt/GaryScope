@@ -15,7 +15,8 @@
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0" Orientation="Horizontal">
-            <CheckBox Content="Run" IsChecked="{Binding IsRunning, Mode=TwoWay}"/>
+            <TextBlock Text="CONNECTED" Visibility="{Binding ScopeConnected, Converter={StaticResource BooleanToVisibilityConverter}}" />
+            <CheckBox Content="Run" VerticalAlignment="Top" IsChecked="{Binding IsRunning, Mode=TwoWay}"/>
             <Slider Maximum="15" SmallChange="1" TickPlacement="TopLeft" Width="100" Value="{Binding ClockSpeed, Mode=TwoWay}"/>
             <Button Content="Reset" Command="{Binding ResetMaxMinCommand}" VerticalAlignment="Top"/>
             <TextBlock Text="{Binding MinValue}" TextAlignment="Right" Width="30" VerticalAlignment="Top" HorizontalAlignment="Center" Padding="0,0,4,0"/>

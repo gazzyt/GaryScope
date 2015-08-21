@@ -14,7 +14,7 @@
     /// </summary>
     public class MainWindowViewModel : ViewModelBase
     {
-        private bool useMockScopeDevice = true;
+        private bool useMockScopeDevice = false;
 
         private IScopeDevice scopeDevice;
         private bool isRunning = true;
@@ -25,6 +25,7 @@
         private long samplesInLastPeriod = 0;
         private long samplesSinceBeginLastPeriod = 0;
         private Timer periodTimer;
+        private bool scopeConnected = false;
 
 
         public MainWindowViewModel()
@@ -39,16 +40,40 @@
                 }
                 else
                 {
-                    //scopeDevice = new UsbScopeDevice();
+                    scopeDevice = new UsbScopeDevice();
                 }
 
                 scopeDevice.DataReceived +=new Action<byte[]>(OnDataReceived);
+                scopeDevice.Connected += ScopeDevice_Connected;
+                scopeDevice.Disconnected += ScopeDevice_Disconnected;
             }
 
             periodTimer = new Timer(PeriodTimerTick, null, 0, 1000);
         }
 
+        private void ScopeDevice_Disconnected()
+        {
+            ScopeConnected = false;
+        }
+
+        private void ScopeDevice_Connected()
+        {
+            ScopeConnected = true;
+        }
+
         public ReverseRingArray Trace1 { get; private set; }
+
+        public bool ScopeConnected
+        {
+            get
+            {
+                return scopeConnected;
+            }
+            set
+            {
+                DispatcherHelper.CheckBeginInvokeOnUI(() => Set(ref scopeConnected, value));
+            }
+        }
 
         void OnDataReceived(byte[] data)
         {
