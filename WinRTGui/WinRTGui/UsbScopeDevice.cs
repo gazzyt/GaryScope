@@ -1,22 +1,26 @@
-﻿using System;
+﻿using GalaSoft.MvvmLight.Threading;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.Devices.Enumeration;
 using Windows.Devices.HumanInterfaceDevice;
 using Windows.Foundation;
 using Windows.Storage;
+using Windows.Storage.Streams;
 
 namespace WinRTGui
 {
     public class UsbScopeDevice : IScopeDevice
     {
-        private const ushort UsagePage = 0x01;
-        private const ushort UsageId = 0x00;
+        private const ushort UsagePage = 0xFF56;
+        private const ushort UsageId = 0xA6;
         private const ushort Vid = 0x4242;
         private const ushort Pid = 0x003;
         private DeviceWatcher ScopeDeviceWatcher;
+        private HidDevice ConnectedScope;
 
         public UsbScopeDevice()
         {
@@ -31,9 +35,21 @@ namespace WinRTGui
         public event Action Connected;
         public event Action Disconnected;
 
-        public void SendData(byte[] data)
+        public async void SendData(byte[] data)
         {
-            throw new NotImplementedException();
+            if (ConnectedScope != null)
+            {
+                try
+                {
+                    var outputReport = ConnectedScope.CreateOutputReport();
+                    WindowsRuntimeBufferExtensions.CopyTo(data, 0, outputReport.Data, 1, data.Length);
+                    await ConnectedScope.SendOutputReportAsync(outputReport);
+                }
+                catch (Exception e)
+                {
+                    int y = 0;
+                }
+            }
         }
 
         public async Task<bool> Connect()
@@ -68,11 +84,34 @@ namespace WinRTGui
 
         private void OnDeviceAdded(DeviceWatcher sender, DeviceInformation deviceInformation)
         {
-            if (Connected != null)
+            DispatcherHelper.CheckBeginInvokeOnUI(async () => 
             {
-                Connected();
+                ConnectedScope = await HidDevice.FromIdAsync(deviceInformation.Id, FileAccessMode.ReadWrite);
+
+                if (ConnectedScope != null)
+                {
+                    ConnectedScope.InputReportReceived += ConnectedScope_InputReportReceived;
+
+                    if (Connected != null)
+                    {
+                        Connected();
+                    }
+                }
+            });
+        }
+
+        private void ConnectedScope_InputReportReceived(HidDevice sender, HidInputReportReceivedEventArgs args)
+        {
+            var bytes = new byte[args.Report.Data.Length];
+            DataReader dr = DataReader.FromBuffer(args.Report.Data);
+            dr.ReadBytes(bytes);
+
+            if (DataReceived != null)
+            {
+                DataReceived(bytes);
             }
         }
 
     }
+
 }

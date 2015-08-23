@@ -44,5 +44,10 @@
 
   <Capabilities>
     <Capability Name="internetClient" />
+  <DeviceCapability Name="humaninterfacedevice">
+    <Device Id="vidpid:4242 0003">
+      <Function Type="usage:ff56 *"/>
+    </Device>
+  </DeviceCapability>
   </Capabilities>
 </Package>
