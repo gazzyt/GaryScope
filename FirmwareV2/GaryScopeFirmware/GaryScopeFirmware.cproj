@@ -104,6 +104,30 @@
     <Compile Include="GaryScopeFirmware.c">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="usbdrv\osccal.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="usbdrv\osccal.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="usbdrv\usbconfig.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="usbdrv\usbdrv.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="usbdrv\usbdrv.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="usbdrv\usbdrvasm.S">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="usbdrv\usbportability.h">
+      <SubType>compile</SubType>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="usbdrv\" />
   </ItemGroup>
   <Import Project="$(AVRSTUDIO_EXE_PATH)\\Vs\\Compiler.targets" />
 </Project>

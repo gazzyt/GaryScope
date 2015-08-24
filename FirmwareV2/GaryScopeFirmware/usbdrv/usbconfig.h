@@ -10,6 +10,8 @@
 #ifndef __usbconfig_h_included__
 #define __usbconfig_h_included__
 
+#define F_CPU 16500000
+
 /*
 General Description:
 This file is an example configuration (with inline documentation) for the USB
@@ -25,11 +27,11 @@ section at the end of this file).
 
 /* ---------------------------- Hardware Config ---------------------------- */
 
-#define USB_CFG_IOPORTNAME      D
+#define USB_CFG_IOPORTNAME      B
 /* This is the port where the USB bus is connected. When you configure it to
  * "B", the registers PORTB, PINB and DDRB will be used.
  */
-#define USB_CFG_DMINUS_BIT      4
+#define USB_CFG_DMINUS_BIT      0
 /* This is the bit number in USB_CFG_IOPORT where the USB D- line is connected.
  * This may be any bit in the port.
  */
@@ -74,7 +76,7 @@ section at the end of this file).
 
 /* --------------------------- Functional Range ---------------------------- */
 
-#define USB_CFG_HAVE_INTRIN_ENDPOINT    0
+#define USB_CFG_HAVE_INTRIN_ENDPOINT    1
 /* Define this to 1 if you want to compile a version with two endpoints: The
  * default control endpoint 0 and an interrupt-in endpoint (any other endpoint
  * number).
@@ -123,7 +125,7 @@ section at the end of this file).
  * The value is in milliamperes. [It will be divided by two since USB
  * communicates power requirements in units of 2 mA.]
  */
-#define USB_CFG_IMPLEMENT_FN_WRITE      0
+#define USB_CFG_IMPLEMENT_FN_WRITE      1
 /* Set this to 1 if you want usbFunctionWrite() to be called for control-out
  * transfers. Set it to 0 if you don't need it and want to save a couple of
  * bytes.
@@ -162,7 +164,13 @@ section at the end of this file).
  * proceed, do a return after doing your things. One possible application
  * (besides debugging) is to flash a status LED on each packet.
  */
-/* #define USB_RESET_HOOK(resetStarts)     if(!resetStarts){hadUsbReset();} */
+
+#ifndef __ASSEMBLER__
+#include <avr/interrupt.h>  // for sei()
+extern void calibrateOscillator(void);
+#endif
+#define USB_RESET_HOOK(resetStarts)  if(!resetStarts){cli(); calibrateOscillator(); sei();}
+	
 /* This macro is a hook if you need to know when an USB RESET occurs. It has
  * one parameter which distinguishes between the start of RESET state and its
  * end.
@@ -203,7 +211,7 @@ section at the end of this file).
  * usbFunctionWrite(). Use the global usbCurrentDataToken and a static variable
  * for each control- and out-endpoint to check for duplicate packets.
  */
-#define USB_CFG_HAVE_MEASURE_FRAME_LENGTH   0
+#define USB_CFG_HAVE_MEASURE_FRAME_LENGTH   1
 /* define this macro to 1 if you want the function usbMeasureFrameLength()
  * compiled in. This function can be used to calibrate the AVR's RC oscillator.
  */
@@ -218,7 +226,7 @@ section at the end of this file).
 
 /* -------------------------- Device Description --------------------------- */
 
-#define  USB_CFG_VENDOR_ID       0xc0, 0x16 /* = 0x16c0 = 5824 = voti.nl */
+#define  USB_CFG_VENDOR_ID       0x42, 0x42 /* = 0x16c0 = 5824 = voti.nl */
 /* USB vendor ID for the device, low byte first. If you have registered your
  * own Vendor ID, define it here. Otherwise you may use one of obdev's free
  * shared VID/PID pairs. Be sure to read USB-IDs-for-free.txt for rules!
@@ -227,7 +235,7 @@ section at the end of this file).
  * with libusb: 0x16c0/0x5dc.  Use this VID/PID pair ONLY if you understand
  * the implications!
  */
-#define  USB_CFG_DEVICE_ID       0xdc, 0x05 /* = 0x05dc = 1500 */
+#define  USB_CFG_DEVICE_ID       0x04, 0x00 /* = 0x05dc = 1500 */
 /* This is the ID of the product, low byte first. It is interpreted in the
  * scope of the vendor ID. If you have registered your own VID with usb.org
  * or if you have licensed a PID from somebody else, define it here. Otherwise
@@ -251,8 +259,8 @@ section at the end of this file).
  * obdev's free shared VID/PID pair. See the file USB-IDs-for-free.txt for
  * details.
  */
-#define USB_CFG_DEVICE_NAME     'T', 'e', 'm', 'p', 'l', 'a', 't', 'e'
-#define USB_CFG_DEVICE_NAME_LEN 8
+#define USB_CFG_DEVICE_NAME     'G', 'a', 'r', 'y', 'S', 'c', 'o', 'p', 'e', '2'
+#define USB_CFG_DEVICE_NAME_LEN 10
 /* Same as above for the device name. If you don't want a device name, undefine
  * the macros. See the file USB-IDs-for-free.txt before you assign a name if
  * you use a shared VID/PID.
@@ -266,12 +274,12 @@ section at the end of this file).
  * to fine tune control over USB descriptors such as the string descriptor
  * for the serial number.
  */
-#define USB_CFG_DEVICE_CLASS        0xff    /* set to 0 if deferred to interface */
+#define USB_CFG_DEVICE_CLASS        0    /* set to 0 if deferred to interface */
 #define USB_CFG_DEVICE_SUBCLASS     0
 /* See USB specification if you want to conform to an existing device class.
  * Class 0xff is "vendor specific".
  */
-#define USB_CFG_INTERFACE_CLASS     0   /* define class here if not at device level */
+#define USB_CFG_INTERFACE_CLASS     3   /* HID */
 #define USB_CFG_INTERFACE_SUBCLASS  0
 #define USB_CFG_INTERFACE_PROTOCOL  0
 /* See USB specification if you want to conform to an existing device class or
@@ -279,7 +287,7 @@ section at the end of this file).
  * HID class is 3, no subclass and protocol required (but may be useful!)
  * CDC class is 2, use subclass 2 and protocol 1 for ACM
  */
-/* #define USB_CFG_HID_REPORT_DESCRIPTOR_LENGTH    42 */
+#define USB_CFG_HID_REPORT_DESCRIPTOR_LENGTH    42
 /* Define this to the length of the HID report descriptor, if you implement
  * an HID device. Otherwise don't define it or define it to 0.
  * If you use this define, you must add a PROGMEM character array named
