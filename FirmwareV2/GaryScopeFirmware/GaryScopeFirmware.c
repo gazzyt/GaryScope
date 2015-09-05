@@ -85,7 +85,7 @@ static void adcInit(void)
 
 	pNextSample = samples;
 	ADMUX = UTIL_BIN8(0010, 0011);  /* Vref=Vcc, measure ADC3, left adjust */
-	ADCSRA = UTIL_BIN8(1010, 1111); /* enable ADC, free running, interrupt enable, rate = 1/128 */
+	ADCSRA = UTIL_BIN8(1010, 1110); /* enable ADC, free running, interrupt enable, rate = 1/64 */
     ADCSRA |= (1 << ADSC);  /* start conversion */
 
 }
