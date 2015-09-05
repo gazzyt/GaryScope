@@ -1,6 +1,7 @@
 ﻿using GalaSoft.MvvmLight.Threading;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text;
@@ -18,9 +19,11 @@ namespace WinRTGui
         private const ushort UsagePage = 0xFF56;
         private const ushort UsageId = 0xA6;
         private const ushort Vid = 0x4242;
-        private const ushort Pid = 0x003;
+        private const ushort Pid = 0x004;
         private DeviceWatcher ScopeDeviceWatcher;
         private HidDevice ConnectedScope;
+        private ushort NextPacketExpected = 0;
+        private byte[] CurrentTrace = null;
 
         public UsbScopeDevice()
         {
@@ -31,7 +34,7 @@ namespace WinRTGui
             ScopeDeviceWatcher.Start();
         }
 
-        public event Action<byte[]> DataReceived;
+        public event Action<byte[]> TraceReceived;
         public event Action Connected;
         public event Action Disconnected;
 
@@ -102,14 +105,45 @@ namespace WinRTGui
 
         private void ConnectedScope_InputReportReceived(HidDevice sender, HidInputReportReceivedEventArgs args)
         {
+            if (args.Report.Data.Length != 9)
+            {
+                Debug.WriteLine("Expected 9 bytes input report, received {0} bytes", args.Report.Data.Length);
+                return;
+            }
+
             var bytes = new byte[args.Report.Data.Length];
             DataReader dr = DataReader.FromBuffer(args.Report.Data);
             dr.ReadBytes(bytes);
 
-            if (DataReceived != null)
+            if (bytes[1] != NextPacketExpected)
             {
-                DataReceived(bytes);
+                Debug.WriteLine("Expect packet {0}, received packet {1}. Discarding trace.", NextPacketExpected, bytes[1]);
+                CurrentTrace = null;
+                NextPacketExpected = 0;
+                return;
             }
+
+            if (NextPacketExpected == 0)
+            {
+                Debug.WriteLine("Packet 0 received, allocating buffer");
+                CurrentTrace = new byte[14 * 7];
+            }
+
+            Array.Copy(bytes, 2, CurrentTrace, NextPacketExpected * 7, 7);
+
+            NextPacketExpected++;
+
+            if (NextPacketExpected == 14)
+            {
+                Debug.WriteLine("Got full trace");
+                if (TraceReceived != null)
+                {
+                    TraceReceived(CurrentTrace);
+                }
+                CurrentTrace = null;
+                NextPacketExpected = 0;
+            }
+
         }
 
     }

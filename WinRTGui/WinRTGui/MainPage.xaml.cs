@@ -30,7 +30,7 @@ namespace WinRTGui
     {
         private MainWindowViewModel viewModel;
         private Timer redrawTimer;
-        private const UInt16 MaxSample = 1024;
+        private const byte MaxSample = 255;
         private const float GraphTopMargin = 20;
         private const float GraphBottomMargin = 20;
         private const float GraphLeftMargin = 40;
@@ -48,12 +48,37 @@ namespace WinRTGui
         private CanvasTextLayout VoltageText5;
         //private Pen[] pens;
 
+        private Binding TraceBinding;
+        public static DependencyProperty TraceProperty = DependencyProperty.Register("Trace", typeof(byte[]), typeof(MainPage), new PropertyMetadata(null, TracePropertyChanged));
+
+        public byte[] Trace
+        {
+            get
+            {
+                return (byte[])GetValue(TraceProperty);
+            }
+        }
+
+        private static void TracePropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            ((MainPage)d).canvas1.Invalidate();
+        }
+
+
         public MainPage()
         {
             this.InitializeComponent();
             viewModel = new MainWindowViewModel();
             this.DataContext = viewModel;
-            redrawTimer = new Timer(RedrawTimerTick, null, 0, 50);
+            TraceBinding = new Binding
+            {
+                Mode = BindingMode.OneWay,
+                Path = new PropertyPath("Trace")
+            };
+
+            this.SetBinding(TraceProperty, TraceBinding);
+
+            //redrawTimer = new Timer(RedrawTimerTick, null, 0, 50);
         }
 
         private void RedrawTimerTick(object state = null)
@@ -77,36 +102,40 @@ namespace WinRTGui
 
         private void DrawLines(CanvasDrawEventArgs args)
         {
-            Vector2 lastLineEnd = new Vector2();
+            Vector2 lastLineStart = new Vector2();
             bool firstSample = true;
-            int reverseIndex = viewModel.Trace1.Capacity - 1;
+            int index = 0;
             int penIndex = 0;
 
-            foreach (var sample in viewModel.Trace1)
-            {
-                if (firstSample)
-                {
-                    lastLineEnd = SampleToVector(reverseIndex, sample.Value);
-                    firstSample = false;
-                }
-                else
-                {
-                    Vector2 thisLineEnd = SampleToVector(reverseIndex, sample.Value);
-                    args.DrawingSession.DrawLine(lastLineEnd, thisLineEnd, Colors.Black);
-                    lastLineEnd = thisLineEnd;
-                    penIndex ^= 1;
-                }
-                reverseIndex--;
-            }
+            byte[] trace = Trace;
 
+            if (trace != null)
+            {
+                foreach (var sample in Trace)
+                {
+                    if (firstSample)
+                    {
+                        lastLineStart = SampleToVector(index, sample);
+                        firstSample = false;
+                    }
+                    else
+                    {
+                        Vector2 thisLineStart = SampleToVector(index, sample);
+                        args.DrawingSession.DrawLine(lastLineStart, thisLineStart, Colors.Black);
+                        lastLineStart = thisLineStart;
+                        penIndex ^= 1;
+                    }
+                    index++;
+                }
+            }
         }
 
-        private Vector2 SampleToVector(int index, ushort value)
+        private Vector2 SampleToVector(int index, byte value)
         {
             return new Vector2((float)(index * XAxisMultiplier) + GraphLeftMargin, ScaleY(value));
         }
 
-        private float ScaleY(UInt16 y)
+        private float ScaleY(byte y)
         {
             return (MaxSample - y) * VoltageYScale + GraphTopMargin;
         }

@@ -43,7 +43,7 @@
                     scopeDevice = new UsbScopeDevice();
                 }
 
-                scopeDevice.DataReceived +=new Action<byte[]>(OnDataReceived);
+                scopeDevice.TraceReceived +=new Action<byte[]>(OnDataReceived);
                 scopeDevice.Connected += ScopeDevice_Connected;
                 scopeDevice.Disconnected += ScopeDevice_Disconnected;
             }
@@ -77,13 +77,7 @@
 
         void OnDataReceived(byte[] data)
         {
-            int sampleIndex = 1;
-
-            while (sampleIndex < data.Length)
-            {
-                OnSampleReceived(data[sampleIndex], data[sampleIndex + 1]);
-                sampleIndex += 2;
-            }
+            DispatcherHelper.CheckBeginInvokeOnUI(() => Trace = data);
         }
 
         void OnSampleReceived(byte lowByte, byte highByte)
@@ -109,6 +103,18 @@
                    MaxValue = newSample.Value;
                }
             });
+        }
+
+        private byte[] _trace;
+
+        public byte[] Trace
+        {
+            get { return _trace; }
+            set
+            {
+                _trace = value;
+                RaisePropertyChanged(() => Trace);
+            }
         }
 
         public bool IsRunning

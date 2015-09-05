@@ -7,7 +7,7 @@
     /// </summary>
     public interface IScopeDevice
     {
-        event Action<byte[]> DataReceived;
+        event Action<byte[]> TraceReceived;
         event Action Connected;
         event Action Disconnected;
         void SendData(byte[] data);

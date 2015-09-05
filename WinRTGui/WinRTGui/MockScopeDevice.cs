@@ -28,18 +28,18 @@ namespace WinRTGui
 
         void sineGenerator_SampleReadyEvent(double sample)
         {
-            if (DataReceived != null)
+            if (TraceReceived != null)
             {
                 UInt16 iSample = Convert.ToUInt16((sample + 1.0) * 512);
                 byte[] byteData = new byte[3];
                 byteData[2] = (byte)(iSample >> 8);
                 byteData[1] = (byte)(iSample & 0x00FF);
                 Debug.WriteLine("{0} | {1} | {2} | {3}", sample, iSample, byteData[1], byteData[2]);
-                DataReceived(byteData);
+                TraceReceived(byteData);
             }
         }
 
-        public event Action<byte[]> DataReceived;
+        public event Action<byte[]> TraceReceived;
         public event Action Connected;
         public event Action Disconnected;
 
