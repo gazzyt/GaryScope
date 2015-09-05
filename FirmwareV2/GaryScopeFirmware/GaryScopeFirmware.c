@@ -21,7 +21,7 @@ const PROGMEM char usbHidReportDescriptor[USB_CFG_HID_REPORT_DESCRIPTOR_LENGTH] 
 	0x15, 0x00,                    //   LOGICAL_MINIMUM (0)
 	0x26, 0xff, 0x00,              //   LOGICAL_MAXIMUM (255)
 	0x75, 0x08,                    //   REPORT_SIZE (8)
-	0x95, 32,                    //   REPORT_COUNT (2)
+	0x95, 8,                    //   REPORT_COUNT (2)
 	0x82, 0x02, 0x01,              //   INPUT (Data,Var,Abs,Buf)
 	0xc0                           // END_COLLECTION
 };
@@ -29,8 +29,6 @@ const PROGMEM char usbHidReportDescriptor[USB_CFG_HID_REPORT_DESCRIPTOR_LENGTH] 
 static uchar    idleRate;   /* repeat rate for keyboards, never used for mice */
 
 char rep1[] = "XXXXXXXX";
-char rep2[] = "Mary had a little lamb, its fleece was white as snow and everywhere that Mary went the lamb was sure to go......";
-char * sendPtr = rep2;
 
 
 #define SAMPLE_TYPE uchar
@@ -42,6 +40,7 @@ char * sendPtr = rep2;
 SAMPLE_TYPE packet[PACKET_HEADER_SIZE + SAMPLES_PER_PACKET];
 SAMPLE_TYPE samples[SAMPLES_PER_PACKET * PACKETS_PER_TRACE];
 SAMPLE_TYPE* pNextSample;
+uchar nextPacket;
 
 #define UTIL_BIN4(x)        (uchar)((0##x & 01000)/64 + (0##x & 0100)/16 + (0##x & 010)/4 + (0##x & 1))
 #define UTIL_BIN8(hi, lo)   (uchar)(UTIL_BIN4(hi) * 16 + UTIL_BIN4(lo))
@@ -55,8 +54,16 @@ enum ScopeMode
 
 static void finishedSampling()
 {
+	nextPacket = 0;
 	CurrentMode = Sending;
 }
+
+static void finishedSending()
+{
+	pNextSample = samples;
+	CurrentMode = Sampling;
+}
+
 
 ISR(ADC_vect)
 {
@@ -107,11 +114,27 @@ usbRequest_t    *rq = (void *)data;
     return 0;   /* default for not implemented requests: return no data back to host */
 }
 
+static void sendNextPacket()
+{
+	if (CurrentMode == Sending)
+	{
+		if (nextPacket < PACKETS_PER_TRACE)
+		{
+			packet[0] = nextPacket;
+			memcpy(&packet[1], samples + nextPacket * SAMPLES_PER_PACKET, SAMPLES_PER_PACKET);
+			nextPacket++;
+			usbSetInterrupt((void *)packet, 8);
+		}
+		else
+		{
+			finishedSending();
+		}
+	}
+}
+
 int __attribute__((noreturn)) main(void)
 {
 	uchar   i;
-	size_t messageLen = strlen(rep2);
-	char* endPtr = sendPtr + messageLen;
 	CurrentMode = Sampling;
 
 	memset(samples, 0xEE, SAMPLES_PER_PACKET * PACKETS_PER_TRACE);
@@ -144,16 +167,7 @@ int __attribute__((noreturn)) main(void)
         usbPoll();
 		
 		if(usbInterruptIsReady()){
-			/* called after every poll of the interrupt endpoint */
-			if (sendPtr < endPtr)
-			{
-				usbSetInterrupt((void *)sendPtr, 8);
-				sendPtr += 8;
-			}
-			else
-			{
-				sendPtr = rep2;
-			}
+			sendNextPacket();
 		}
 
     }
