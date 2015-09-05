@@ -5,6 +5,7 @@
  *  Author: garyt
  */ 
 
+#include <string.h>
 #include <avr/interrupt.h>
 #include <avr/io.h>
 #include <avr/wdt.h>
@@ -30,6 +31,57 @@ static uchar    idleRate;   /* repeat rate for keyboards, never used for mice */
 char rep1[] = "XXXXXXXX";
 char rep2[] = "Mary had a little lamb, its fleece was white as snow and everywhere that Mary went the lamb was sure to go......";
 char * sendPtr = rep2;
+
+
+#define SAMPLE_TYPE uchar
+#define SAMPLE_SIZE sizeof(SAMPLE_TYPE)
+#define SAMPLES_PER_PACKET 7
+#define PACKET_HEADER_SIZE 1
+#define PACKETS_PER_TRACE 14
+
+SAMPLE_TYPE packet[PACKET_HEADER_SIZE + SAMPLES_PER_PACKET];
+SAMPLE_TYPE samples[SAMPLES_PER_PACKET * PACKETS_PER_TRACE];
+SAMPLE_TYPE* pNextSample;
+
+#define UTIL_BIN4(x)        (uchar)((0##x & 01000)/64 + (0##x & 0100)/16 + (0##x & 010)/4 + (0##x & 1))
+#define UTIL_BIN8(hi, lo)   (uchar)(UTIL_BIN4(hi) * 16 + UTIL_BIN4(lo))
+
+enum ScopeMode
+{
+	Sampling = 0,
+	Sending = 1
+} CurrentMode;
+
+
+static void finishedSampling()
+{
+	CurrentMode = Sending;
+}
+
+ISR(ADC_vect)
+{
+	if (CurrentMode == Sampling)
+	{
+		if (pNextSample < samples + SAMPLES_PER_PACKET * PACKETS_PER_TRACE)
+		{
+			*pNextSample++ = ADCH;
+		}
+		else
+		{
+			finishedSampling();
+		}
+	}
+}
+
+static void adcInit(void)
+{
+
+	pNextSample = samples;
+	ADMUX = UTIL_BIN8(0010, 0011);  /* Vref=Vcc, measure ADC3, left adjust */
+	ADCSRA = UTIL_BIN8(1010, 1111); /* enable ADC, free running, interrupt enable, rate = 1/128 */
+    ADCSRA |= (1 << ADSC);  /* start conversion */
+
+}
 
 usbMsgLen_t usbFunctionSetup(uchar data[8])
 {
@@ -60,6 +112,9 @@ int __attribute__((noreturn)) main(void)
 	uchar   i;
 	size_t messageLen = strlen(rep2);
 	char* endPtr = sendPtr + messageLen;
+	CurrentMode = Sampling;
+
+	memset(samples, 0xEE, SAMPLES_PER_PACKET * PACKETS_PER_TRACE);
 
     wdt_enable(WDTO_1S);
     /* Even if you don't use the watchdog, turn it off here. On newer devices,
@@ -80,6 +135,7 @@ int __attribute__((noreturn)) main(void)
     }
 
     usbDeviceConnect();
+	adcInit();
     sei();
 
     while(1)
