@@ -17,7 +17,6 @@ namespace WinRTGui
     public sealed partial class MainPage : Page
     {
         private const byte MaxSampleValue = 255;
-        private const byte MaxSamplesInTrace = 
         private const float GraphTopMargin = 20;
         private const float GraphBottomMargin = 20;
         private const float GraphLeftMargin = 40;
@@ -97,8 +96,6 @@ namespace WinRTGui
             //DrawLines();
         }
 
-        private const double XAxisMultiplier = 3.0;
-
         private void DrawLines(CanvasDrawEventArgs args)
         {
             Vector2 lastLineStart = new Vector2();
@@ -107,18 +104,19 @@ namespace WinRTGui
 
             byte[] trace = Trace;
 
-            if (trace != null)
+            if (trace != null && trace.Length > 1)
             {
+                float XAxisMultiplier = (float)((canvas1.ActualWidth - GraphLeftMargin) / (trace.Length - 1));
                 foreach (var sample in Trace)
                 {
                     if (firstSample)
                     {
-                        lastLineStart = SampleToVector(index, sample);
+                        lastLineStart = SampleToVector(index, sample, XAxisMultiplier);
                         firstSample = false;
                     }
                     else
                     {
-                        Vector2 thisLineStart = SampleToVector(index, sample);
+                        Vector2 thisLineStart = SampleToVector(index, sample, XAxisMultiplier);
                         args.DrawingSession.DrawLine(lastLineStart, thisLineStart, Colors.Black);
                         lastLineStart = thisLineStart;
                     }
@@ -127,7 +125,7 @@ namespace WinRTGui
             }
         }
 
-        private Vector2 SampleToVector(int index, byte value)
+        private Vector2 SampleToVector(int index, byte value, float XAxisMultiplier)
         {
             return new Vector2((float)(index * XAxisMultiplier) + GraphLeftMargin, ScaleY(value));
         }
