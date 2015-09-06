@@ -1,4 +1,4 @@
-﻿namespace WinRTGui
+﻿namespace WinRTGui.ViewModel
 {
     using System;
     using System.Windows.Input;

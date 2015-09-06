@@ -28,7 +28,6 @@ namespace WinRTGui
     /// </summary>
     public sealed partial class MainPage : Page
     {
-        private MainWindowViewModel viewModel;
         private Timer redrawTimer;
         private const byte MaxSample = 255;
         private const float GraphTopMargin = 20;
@@ -68,8 +67,6 @@ namespace WinRTGui
         public MainPage()
         {
             this.InitializeComponent();
-            viewModel = new MainWindowViewModel();
-            this.DataContext = viewModel;
             TraceBinding = new Binding
             {
                 Mode = BindingMode.OneWay,

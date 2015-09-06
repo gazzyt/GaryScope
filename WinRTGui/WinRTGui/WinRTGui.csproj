@@ -102,7 +102,7 @@
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="MainWindowViewModel.cs" />
+    <Compile Include="ViewModel\MainWindowViewModel.cs" />
     <Compile Include="MockScopeDevice.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ReverseRingArray.cs" />
@@ -110,7 +110,6 @@
     <Compile Include="ScopeSample.cs" />
     <Compile Include="SineGenerator.cs" />
     <Compile Include="UsbScopeDevice.cs" />
-    <Compile Include="ViewModel\MainViewModel.cs" />
     <Compile Include="ViewModel\ViewModelLocator.cs" />
   </ItemGroup>
   <ItemGroup>
