@@ -16,7 +16,8 @@ namespace WinRTGui
     /// </summary>
     public sealed partial class MainPage : Page
     {
-        private const byte MaxSample = 255;
+        private const byte MaxSampleValue = 255;
+        private const byte MaxSamplesInTrace = 
         private const float GraphTopMargin = 20;
         private const float GraphBottomMargin = 20;
         private const float GraphLeftMargin = 40;
@@ -88,7 +89,7 @@ namespace WinRTGui
         {
             VoltageLineSpacing = (float)(canvas1.ActualHeight - GraphTopMargin - GraphBottomMargin) / 5;
             VoltageLineEnd = (float)canvas1.ActualWidth;
-            VoltageYScale = (float)((canvas1.ActualHeight - GraphTopMargin - GraphBottomMargin) / MaxSample);
+            VoltageYScale = (float)((canvas1.ActualHeight - GraphTopMargin - GraphBottomMargin) / MaxSampleValue);
         }
 
         private void DrawScene()
@@ -96,7 +97,7 @@ namespace WinRTGui
             //DrawLines();
         }
 
-        private const double XAxisMultiplier = 5.0;
+        private const double XAxisMultiplier = 3.0;
 
         private void DrawLines(CanvasDrawEventArgs args)
         {
@@ -133,7 +134,7 @@ namespace WinRTGui
 
         private float ScaleY(byte y)
         {
-            return (MaxSample - y) * VoltageYScale + GraphTopMargin;
+            return (MaxSampleValue - y) * VoltageYScale + GraphTopMargin;
         }
 
         private void canvas1_Draw(CanvasControl sender, CanvasDrawEventArgs args)

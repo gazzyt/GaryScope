@@ -21,7 +21,7 @@ namespace WinRTGui
         private const ushort Vid = 0x4242;
         private const ushort Pid = 0x004;
         private const ushort NumSamplesPerPacket = 7;
-        private const ushort NumPacketsPerTrace = 14;
+        private const ushort NumPacketsPerTrace = 35;
         private const ushort PacketOverheadBytes = 2;
         private DeviceWatcher ScopeDeviceWatcher;
         private HidDevice ConnectedScope;
@@ -136,7 +136,7 @@ namespace WinRTGui
 
             NextPacketExpected++;
 
-            if (NextPacketExpected == 14)
+            if (NextPacketExpected == NumPacketsPerTrace)
             {
                 Debug.WriteLine("Got full trace");
                 if (TraceReceived != null)
