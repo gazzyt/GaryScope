@@ -1,23 +1,11 @@
 ﻿using GalaSoft.MvvmLight.Threading;
 using Microsoft.Graphics.Canvas.Text;
 using Microsoft.Graphics.Canvas.UI.Xaml;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Numerics;
-using System.Runtime.InteropServices.WindowsRuntime;
-using System.Threading;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
 using Windows.UI;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Controls.Primitives;
 using Windows.UI.Xaml.Data;
-using Windows.UI.Xaml.Input;
-using Windows.UI.Xaml.Media;
-using Windows.UI.Xaml.Navigation;
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -28,7 +16,6 @@ namespace WinRTGui
     /// </summary>
     public sealed partial class MainPage : Page
     {
-        private Timer redrawTimer;
         private const byte MaxSample = 255;
         private const float GraphTopMargin = 20;
         private const float GraphBottomMargin = 20;
@@ -45,11 +32,20 @@ namespace WinRTGui
         private CanvasTextLayout VoltageText3;
         private CanvasTextLayout VoltageText4;
         private CanvasTextLayout VoltageText5;
-        //private Pen[] pens;
 
+        /// <summary>
+        /// Use a binding here to get the Trace changes from the VM
+        /// </summary>
         private Binding TraceBinding;
+
+        /// <summary>
+        /// Dependency property to bind to the Trace
+        /// </summary>
         public static DependencyProperty TraceProperty = DependencyProperty.Register("Trace", typeof(byte[]), typeof(MainPage), new PropertyMetadata(null, TracePropertyChanged));
 
+        /// <summary>
+        /// C# wrapper property to get Trace
+        /// </summary>
         public byte[] Trace
         {
             get
@@ -58,6 +54,11 @@ namespace WinRTGui
             }
         }
 
+        /// <summary>
+        /// Change handler for Trace dependency property. When this happens we just invalidate the canvas.
+        /// </summary>
+        /// <param name="d"></param>
+        /// <param name="e"></param>
         private static void TracePropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             ((MainPage)d).canvas1.Invalidate();
@@ -102,7 +103,6 @@ namespace WinRTGui
             Vector2 lastLineStart = new Vector2();
             bool firstSample = true;
             int index = 0;
-            int penIndex = 0;
 
             byte[] trace = Trace;
 
@@ -120,7 +120,6 @@ namespace WinRTGui
                         Vector2 thisLineStart = SampleToVector(index, sample);
                         args.DrawingSession.DrawLine(lastLineStart, thisLineStart, Colors.Black);
                         lastLineStart = thisLineStart;
-                        penIndex ^= 1;
                     }
                     index++;
                 }

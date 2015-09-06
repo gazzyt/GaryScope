@@ -14,8 +14,6 @@
     /// </summary>
     public class MainWindowViewModel : ViewModelBase
     {
-        private bool useMockScopeDevice = false;
-
         private IScopeDevice scopeDevice;
         private bool isRunning = true;
         private byte clockSpeed = 0x0b;
@@ -30,18 +28,9 @@
 
         public MainWindowViewModel()
         {
-            Trace1 = new ReverseRingArray(linesPerTrace);
-
             if (!IsInDesignMode)
             {
-                if (useMockScopeDevice)
-                {
-                    scopeDevice = new MockScopeDevice();
-                }
-                else
-                {
-                    scopeDevice = new UsbScopeDevice();
-                }
+                scopeDevice = new UsbScopeDevice();
 
                 scopeDevice.TraceReceived +=new Action<byte[]>(OnDataReceived);
                 scopeDevice.Connected += ScopeDevice_Connected;
@@ -61,8 +50,6 @@
             ScopeConnected = true;
         }
 
-        public ReverseRingArray Trace1 { get; private set; }
-
         public bool ScopeConnected
         {
             get
@@ -78,31 +65,6 @@
         void OnDataReceived(byte[] data)
         {
             DispatcherHelper.CheckBeginInvokeOnUI(() => Trace = data);
-        }
-
-        void OnSampleReceived(byte lowByte, byte highByte)
-        {
-            UInt16 captureval1 = (UInt16)(lowByte + highByte * 256);
-
-            ScopeSample newSample = new ScopeSample { Time = DateTime.Now, Value = captureval1 };
-
-            Trace1.Add(newSample);
-
-            Interlocked.Increment(ref samplesSinceBeginLastPeriod);
-
-            DispatcherHelper.CheckBeginInvokeOnUI(() =>
-            {
-
-               if (!MinValue.HasValue || newSample.Value < MinValue.Value)
-               {
-                   MinValue = newSample.Value;
-               }
-
-               if (!MaxValue.HasValue || newSample.Value > MaxValue.Value)
-               {
-                   MaxValue = newSample.Value;
-               }
-            });
         }
 
         private byte[] _trace;
