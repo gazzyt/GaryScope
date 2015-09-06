@@ -20,6 +20,9 @@ namespace WinRTGui
         private const ushort UsageId = 0xA6;
         private const ushort Vid = 0x4242;
         private const ushort Pid = 0x004;
+        private const ushort NumSamplesPerPacket = 7;
+        private const ushort NumPacketsPerTrace = 14;
+        private const ushort PacketOverheadBytes = 2;
         private DeviceWatcher ScopeDeviceWatcher;
         private HidDevice ConnectedScope;
         private ushort NextPacketExpected = 0;
@@ -105,9 +108,9 @@ namespace WinRTGui
 
         private void ConnectedScope_InputReportReceived(HidDevice sender, HidInputReportReceivedEventArgs args)
         {
-            if (args.Report.Data.Length != 9)
+            if (args.Report.Data.Length != NumSamplesPerPacket + PacketOverheadBytes)
             {
-                Debug.WriteLine("Expected 9 bytes input report, received {0} bytes", args.Report.Data.Length);
+                Debug.WriteLine("Expected {0} bytes input report, received {1} bytes", NumSamplesPerPacket + PacketOverheadBytes, args.Report.Data.Length);
                 return;
             }
 
@@ -126,10 +129,10 @@ namespace WinRTGui
             if (NextPacketExpected == 0)
             {
                 Debug.WriteLine("Packet 0 received, allocating buffer");
-                CurrentTrace = new byte[14 * 7];
+                CurrentTrace = new byte[NumPacketsPerTrace * NumSamplesPerPacket];
             }
 
-            Array.Copy(bytes, 2, CurrentTrace, NextPacketExpected * 7, 7);
+            Array.Copy(bytes, PacketOverheadBytes, CurrentTrace, NextPacketExpected * NumSamplesPerPacket, NumSamplesPerPacket);
 
             NextPacketExpected++;
 
