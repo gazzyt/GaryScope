@@ -6,11 +6,13 @@
  */ 
 
 #include <string.h>
+#include <avr/eeprom.h>
 #include <avr/interrupt.h>
 #include <avr/io.h>
 #include <avr/wdt.h>
 
 #include "usbdrv.h"
+#include "oddebug.h"
 #include <util/delay.h>
 
 const PROGMEM char usbHidReportDescriptor[USB_CFG_HID_REPORT_DESCRIPTOR_LENGTH] = { /* USB report descriptor */
@@ -21,8 +23,14 @@ const PROGMEM char usbHidReportDescriptor[USB_CFG_HID_REPORT_DESCRIPTOR_LENGTH] 
 	0x15, 0x00,                    //   LOGICAL_MINIMUM (0)
 	0x26, 0xff, 0x00,              //   LOGICAL_MAXIMUM (255)
 	0x75, 0x08,                    //   REPORT_SIZE (8)
-	0x95, 8,                    //   REPORT_COUNT (2)
+	0x95, 8,                    //   REPORT_COUNT (8)
 	0x82, 0x02, 0x01,              //   INPUT (Data,Var,Abs,Buf)
+    0x09, 0xA8,					   //   USAGE (undefined)
+    0x15, 0x00,                    //   LOGICAL_MINIMUM (0)
+    0x26, 0xff, 0x00,              //   LOGICAL_MAXIMUM (255)
+    0x75, 0x08,                    //   REPORT_SIZE (8)
+    0x95, 0x02,                    //   REPORT_COUNT (2)
+    0x92, 0x02, 0x01,              //   OUTPUT (Data,Var,Abs,Buf)
 	0xc0                           // END_COLLECTION
 };
 
@@ -41,6 +49,8 @@ SAMPLE_TYPE packet[PACKET_HEADER_SIZE + SAMPLES_PER_PACKET];
 SAMPLE_TYPE samples[SAMPLES_PER_PACKET * PACKETS_PER_TRACE];
 SAMPLE_TYPE* pNextSample;
 uchar nextPacket;
+uchar sampleNumber;
+volatile uchar samplingSpeed;
 
 #define UTIL_BIN4(x)        (uchar)((0##x & 01000)/64 + (0##x & 0100)/16 + (0##x & 010)/4 + (0##x & 1))
 #define UTIL_BIN8(hi, lo)   (uchar)(UTIL_BIN4(hi) * 16 + UTIL_BIN4(lo))
@@ -60,6 +70,7 @@ static void finishedSampling()
 
 static void finishedSending()
 {
+	sampleNumber = 0;
 	pNextSample = samples;
 	CurrentMode = Sampling;
 }
@@ -71,7 +82,10 @@ ISR(ADC_vect)
 	{
 		if (pNextSample < samples + SAMPLES_PER_PACKET * PACKETS_PER_TRACE)
 		{
-			*pNextSample++ = ADCH;
+			if (sampleNumber++ % samplingSpeed == 0)
+			{
+				*pNextSample++ = ADCH;
+			}
 		}
 		else
 		{
@@ -82,7 +96,8 @@ ISR(ADC_vect)
 
 static void adcInit(void)
 {
-
+	samplingSpeed = 10;
+	sampleNumber = 0;
 	pNextSample = samples;
 	ADMUX = UTIL_BIN8(0010, 0011);  /* Vref=Vcc, measure ADC3, left adjust */
 	ADCSRA = UTIL_BIN8(1010, 1110); /* enable ADC, free running, interrupt enable, rate = 1/64 */
@@ -102,6 +117,8 @@ usbRequest_t    *rq = (void *)data;
             /* we only have one report type, so don't look at wValue */
             usbMsgPtr = (void *)&rep1[0];
             return sizeof(8);
+		}else if(rq->bRequest == USBRQ_HID_SET_REPORT){
+			return USB_NO_MSG;
         }else if(rq->bRequest == USBRQ_HID_GET_IDLE){
             usbMsgPtr = &idleRate;
             return 1;
@@ -112,6 +129,28 @@ usbRequest_t    *rq = (void *)data;
         /* no vendor specific requests implemented */
     }
     return 0;   /* default for not implemented requests: return no data back to host */
+}
+
+uchar   usbFunctionWrite(uchar *data, uchar len)
+{
+/*	cli();
+	eeprom_write_byte((uint8_t *)2, len);
+	eeprom_write_byte((uint8_t *)3, data[0]);
+	eeprom_write_byte((uint8_t *)4, data[1]);
+	sei(); */
+
+	if(len < 2)
+	return 0xFF; // Stall
+	
+	if (data[0] == 1)
+	{
+		samplingSpeed = data[1];
+		return 1;
+	}
+	else
+	{
+		return 0xFF;
+	}
 }
 
 static void sendNextPacket()
@@ -148,7 +187,6 @@ int __attribute__((noreturn)) main(void)
      * additional hardware initialization.
      */
 
-    usbInit();
     usbDeviceDisconnect();  /* enforce re-enumeration, do this while interrupts are disabled! */
 
     i = 0;
@@ -159,6 +197,7 @@ int __attribute__((noreturn)) main(void)
 
     usbDeviceConnect();
 	adcInit();
+    usbInit();
     sei();
 
     while(1)
