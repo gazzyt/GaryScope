@@ -6,7 +6,6 @@
  */ 
 
 #include <string.h>
-#include <avr/eeprom.h>
 #include <avr/interrupt.h>
 #include <avr/io.h>
 #include <avr/wdt.h>
@@ -133,14 +132,8 @@ usbRequest_t    *rq = (void *)data;
 
 uchar   usbFunctionWrite(uchar *data, uchar len)
 {
-/*	cli();
-	eeprom_write_byte((uint8_t *)2, len);
-	eeprom_write_byte((uint8_t *)3, data[0]);
-	eeprom_write_byte((uint8_t *)4, data[1]);
-	sei(); */
-
 	if(len < 2)
-	return 0xFF; // Stall
+		return 0xFF; // Stall
 	
 	if (data[0] == 1)
 	{
